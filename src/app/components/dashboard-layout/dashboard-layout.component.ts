@@ -25,12 +25,19 @@ export class DashboardLayoutComponent implements OnInit {
     this.loadSessions();
   }
 
-  loadSources() {
-    this.loading.set(true);
-    this.apiService.getSources().subscribe({
+  loadSources(pageToken?: string, accumulatedSources: Source[] = []) {
+    if (!pageToken) {
+      this.loading.set(true);
+    }
+    this.apiService.getSources(pageToken).subscribe({
       next: (res) => {
-        this.sources.set(res.sources || []);
-        this.loading.set(false);
+        const currentSources = [...accumulatedSources, ...(res.sources || [])];
+        if (res.nextPageToken) {
+          this.loadSources(res.nextPageToken, currentSources);
+        } else {
+          this.sources.set(currentSources);
+          this.loading.set(false);
+        }
       },
       error: (err) => {
         this.error.set('Failed to load repositories');

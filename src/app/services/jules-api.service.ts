@@ -15,8 +15,9 @@ export class JulesApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = 'https://jules.googleapis.com/v1alpha';
 
-  getSources(): Observable<ListSourcesResponse> {
-    return this.http.get<ListSourcesResponse>(`${this.baseUrl}/sources`);
+  getSources(pageToken?: string): Observable<ListSourcesResponse> {
+    const url = pageToken ? `${this.baseUrl}/sources?pageToken=${pageToken}` : `${this.baseUrl}/sources`;
+    return this.http.get<ListSourcesResponse>(url);
   }
 
   getSessions(): Observable<ListSessionsResponse> {
