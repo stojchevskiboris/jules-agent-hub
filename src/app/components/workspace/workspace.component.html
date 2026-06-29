@@ -1,0 +1,86 @@
+<div class="workspace-container">
+  <!-- Session Creator (Visible when no active session) -->
+  <div *ngIf="!activeSessionId() && selectedSource()" class="session-creator">
+    <div class="creator-card">
+      <h2>Start New Task</h2>
+      <p class="subtitle">Repository: {{ selectedSource() }}</p>
+
+      <div class="form-group">
+        <label>What would you like Jules to do?</label>
+        <textarea
+          [(ngModel)]="newPrompt"
+          placeholder="e.g., Fix the bug in the login component..."
+          rows="5"
+        ></textarea>
+      </div>
+
+      <div class="form-options">
+        <label class="toggle">
+          <input type="checkbox"
+            [checked]="automationMode() === 'AUTO_CREATE_PR'"
+            (change)="automationMode.set($any($event.target).checked ? 'AUTO_CREATE_PR' : 'NONE')">
+          <span class="slider"></span>
+          Auto-create Pull Request
+        </label>
+
+        <button class="btn-primary" (click)="createSession()" [disabled]="loading() || !newPrompt()">
+          {{ loading() ? 'Starting...' : 'Launch Agent' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!activeSessionId() && !selectedSource()" class="empty-state">
+    <div class="message">
+      <i class="icon">👈</i>
+      <h3>Select a repository to get started</h3>
+    </div>
+  </div>
+
+  <!-- Active Session Workspace -->
+  <div *ngIf="activeSessionId()" class="active-workspace">
+    <header class="workspace-header">
+      <div class="session-info">
+        <h3>Session #{{ getShortName(activeSessionId()!) }}</h3>
+        <span class="status-badge" [class]="session()?.state?.toLowerCase()">{{ session()?.state }}</span>
+      </div>
+      <div class="source-info">
+        Source: {{ session()?.source }}
+      </div>
+    </header>
+
+    <div class="workspace-layout">
+      <!-- Activity Timeline -->
+      <div class="activity-feed" #scrollContainer>
+        <div *ngFor="let activity of activities()" class="activity-item"
+             [class.user-msg]="activity.type === 'USER_MESSAGE'"
+             [class.agent-msg]="activity.type !== 'USER_MESSAGE'">
+          <div class="activity-meta">
+            <span class="author">{{ activity.type === 'USER_MESSAGE' ? 'You' : 'Jules' }}</span>
+            <span class="time">{{ activity.createTime | date:'shortTime' }}</span>
+          </div>
+          <div class="activity-text">
+            {{ activity.text }}
+          </div>
+        </div>
+
+        <div *ngIf="activities().length === 0" class="no-activity">
+          Initializing session...
+        </div>
+      </div>
+
+      <!-- Chat Input -->
+      <footer class="chat-footer">
+        <div class="chat-input-wrapper">
+          <input type="text"
+                 [(ngModel)]="chatMessage"
+                 (keyup.enter)="sendChatMessage()"
+                 placeholder="Type a message to the agent...">
+          <button class="btn-send" (click)="sendChatMessage()" [disabled]="!chatMessage()">
+            Send
+          </button>
+        </div>
+      </footer>
+    </div>
+  </div>
+</div>
