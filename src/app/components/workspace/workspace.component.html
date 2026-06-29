@@ -10,17 +10,12 @@
 
       <div class="form-group">
         <label>What would you like Jules to do?</label>
-        <textarea
-          [(ngModel)]="newPrompt"
-          placeholder="e.g., Fix the bug in the login component..."
-          rows="5"
-        ></textarea>
+        <textarea [(ngModel)]="newPrompt" placeholder="e.g., Fix the bug in the login component..." rows="5"></textarea>
       </div>
 
       <div class="form-options">
         <label class="toggle">
-          <input type="checkbox"
-            [checked]="automationMode() === 'AUTO_CREATE_PR'"
+          <input type="checkbox" [checked]="automationMode() === 'AUTO_CREATE_PR'"
             (change)="automationMode.set($any($event.target).checked ? 'AUTO_CREATE_PR' : 'NONE')">
           <span class="slider"></span>
           Auto-create Pull Request
@@ -58,14 +53,13 @@
       <!-- Activity Timeline -->
       <div class="activity-feed" #scrollContainer>
         <div *ngFor="let activity of activities()" class="activity-item"
-             [class.user-msg]="activity.type === 'USER_MESSAGE'"
-             [class.agent-msg]="activity.type !== 'USER_MESSAGE'">
+          [class.user-msg]="activity.originator === 'user'" [class.agent-msg]="activity.originator !== 'user'">
           <div class="activity-meta">
-            <span class="author">{{ activity.type === 'USER_MESSAGE' ? 'You' : 'Jules' }}</span>
+            <span class="author">{{ activity.originator === 'user' ? 'You' : 'Jules' }}</span>
             <span class="time">{{ activity.createTime | date:'shortTime' }}</span>
           </div>
           <div class="activity-text">
-            {{ activity.text }}
+            <!-- {{ activity.text }} -->
           </div>
         </div>
 
@@ -77,10 +71,8 @@
       <!-- Chat Input -->
       <footer class="chat-footer">
         <div class="chat-input-wrapper">
-          <input type="text"
-                 [(ngModel)]="chatMessage"
-                 (keyup.enter)="sendChatMessage()"
-                 placeholder="Type a message to the agent...">
+          <input type="text" [(ngModel)]="chatMessage" (keyup.enter)="sendChatMessage()"
+            placeholder="Type a message to the agent...">
           <button class="btn-send" (click)="sendChatMessage()" [disabled]="!chatMessage()">
             Send
           </button>

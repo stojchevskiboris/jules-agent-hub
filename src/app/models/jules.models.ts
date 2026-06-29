@@ -49,9 +49,8 @@ export interface ListSessionsResponse {
 
 export interface Activity {
   name: string; // format: sessions/{id}/activities/{activityId}
-  type?: string;
-  text?: string;
   createTime: string;
+  originator?: string;
 }
 
 export interface ListActivitiesResponse {
