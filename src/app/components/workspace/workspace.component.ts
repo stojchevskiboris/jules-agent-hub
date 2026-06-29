@@ -139,4 +139,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   setAutomationMode(checked: boolean) {
     this.automationMode.set(checked ? AutomationMode.AUTO_CREATE_PR : AutomationMode.AUTOMATION_MODE_UNSPECIFIED);
   }
+
+  truncateTitle(title: string | undefined, maxLength: number = 80): string {
+    if (!title) return 'No title';
+    if (title.length <= maxLength) return title;
+    return title.substring(0, maxLength) + '...';
+  }
+
 }
