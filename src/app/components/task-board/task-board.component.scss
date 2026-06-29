@@ -8,9 +8,43 @@
   align-items: center;
   margin-bottom: 2rem;
 
+  .title-section {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
   h2 {
     font-size: 1.5rem;
     color: #f0f6fc;
+    margin: 0;
+  }
+
+  .filters {
+    display: flex;
+    gap: 0.5rem;
+
+    .filter-btn {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #8b949e;
+      padding: 0.3rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        border-color: #8b949e;
+        color: #f0f6fc;
+      }
+
+      &.active {
+        background: #1f6feb;
+        border-color: #388bfd;
+        color: white;
+      }
+    }
   }
 
   .btn-refresh {
@@ -75,6 +109,13 @@
   border-radius: 6px;
   padding: 1rem;
   margin-bottom: 1rem;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.2s;
+
+  &:hover {
+    border-color: #58a6ff;
+    background-color: #161b22;
+  }
 
   &.completed {
     border-left: 4px solid #238636;
@@ -95,20 +136,40 @@
       padding: 0.1rem 0.4rem;
       border-radius: 4px;
       background: #21262d;
+      text-transform: uppercase;
 
-      &.open { color: #d29922; }
-      &.success { color: #3fb950; }
+      &.open, &.active { color: #d29922; }
+      &.completed, &.success { color: #3fb950; }
+      &.failed { color: #f85149; }
+      &.cancelled { color: #8b949e; }
     }
   }
 
+  .task-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: #f0f6fc;
+  }
+
   .task-instruction {
-    font-size: 0.9rem;
-    color: #c9d1d9;
-    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: #8b949e;
+    margin-bottom: 0.75rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+
+  .task-meta {
+    margin-bottom: 1rem;
+    .time-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      font-size: 0.7rem;
+      color: #6e7681;
+    }
   }
 
   .task-footer {
@@ -119,12 +180,14 @@
     .task-source {
       font-size: 0.75rem;
       color: #8b949e;
+      font-family: monospace;
     }
 
     .btn-open {
       color: #58a6ff;
       text-decoration: none;
       font-size: 0.85rem;
+      font-weight: 500;
       &:hover { text-decoration: underline; }
     }
 

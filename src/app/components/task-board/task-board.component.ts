@@ -16,13 +16,26 @@ export class TaskBoardComponent implements OnInit {
 
   sessions = signal<Session[]>([]);
   loading = signal<boolean>(true);
+  selectedState = signal<string>('ALL');
+
+  availableStates = ['ALL', 'ACTIVE', 'COMPLETED', 'FAILED', 'CANCELLED'];
+
+  filteredSessions = computed(() => {
+    const all = this.sessions();
+    const filter = this.selectedState();
+    if (filter === 'ALL') return all;
+    if (filter === 'ACTIVE') {
+      return all.filter(s => s.state === 'ACTIVE' || s.state === 'OPEN' || !s.state);
+    }
+    return all.filter(s => s.state === filter);
+  });
 
   activeTasks = computed(() =>
-    this.sessions().filter(s => !s.outputs?.pullRequest)
+    this.filteredSessions().filter(s => s.state === 'ACTIVE' || s.state === 'OPEN' || !s.state)
   );
 
   archivedTasks = computed(() =>
-    this.sessions().filter(s => !!s.outputs?.pullRequest)
+    this.filteredSessions().filter(s => s.state !== 'ACTIVE' && s.state !== 'OPEN' && !!s.state)
   );
 
   ngOnInit() {
@@ -45,5 +58,15 @@ export class TaskBoardComponent implements OnInit {
 
   getShortName(fullName: string): string {
     return fullName.split('/').pop() || fullName;
+  }
+
+  truncateTitle(title: string | undefined, maxLength: number = 80): string {
+    if (!title) return 'No title';
+    if (title.length <= maxLength) return title;
+    return title.substring(0, maxLength) + '...';
+  }
+
+  setStateFilter(state: string) {
+    this.selectedState.set(state);
   }
 }
