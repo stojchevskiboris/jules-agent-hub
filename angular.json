@@ -20,7 +20,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "dist/InstantMenu",
+            "outputPath": "dist/jules-agent-hub",
             "prerender": false,
             "ssr": false,
             "browser": "src/main.ts",
