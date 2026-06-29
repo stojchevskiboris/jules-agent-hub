@@ -37,7 +37,7 @@
             <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state || 'ACTIVE' }}</span>
           </div>
           <h4 class="task-title">{{ truncateTitle(task.title) }}</h4>
-          <p class="task-instruction">{{ task.instruction }}</p>
+          <p class="task-instruction">{{ task.prompt }}</p>
           <div class="task-meta">
             <div class="time-info">
               <span>Created: {{ task.createTime | date:'short' }}</span>
@@ -45,7 +45,7 @@
             </div>
           </div>
           <div class="task-footer">
-            <span class="task-source">{{ task.source }}</span>
+            <span class="task-source">{{ task.sourceContext.source }}</span>
             <span class="btn-open">Open</span>
           </div>
         </div>
@@ -68,7 +68,7 @@
             <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state }}</span>
           </div>
           <h4 class="task-title">{{ truncateTitle(task.title) }}</h4>
-          <p class="task-instruction">{{ task.instruction }}</p>
+          <p class="task-instruction">{{ task.prompt }}</p>
           <div class="task-meta">
             <div class="time-info">
               <span>Created: {{ task.createTime | date:'short' }}</span>
@@ -76,9 +76,9 @@
             </div>
           </div>
           <div class="task-footer">
-            <ng-container *ngIf="task.outputs?.pullRequest as pr">
+            <ng-container *ngIf="getPullRequest(task) as pr">
               <a [href]="pr.url" target="_blank" class="pr-link" (click)="$event.stopPropagation()">
-                View PR #{{ pr.number }}
+                View PR
               </a>
             </ng-container>
             <span class="btn-open">Details</span>

@@ -16,7 +16,7 @@
       <div class="form-options">
         <label class="toggle">
           <input type="checkbox" [checked]="automationMode() === 'AUTO_CREATE_PR'"
-            (change)="automationMode.set($any($event.target).checked ? 'AUTO_CREATE_PR' : 'NONE')">
+            (change)="setAutomationMode($any($event.target).checked)">
           <span class="slider"></span>
           Auto-create Pull Request
         </label>
@@ -45,7 +45,7 @@
         <span class="status-badge" [class]="session()?.state?.toLowerCase()">{{ session()?.state }}</span>
       </div>
       <div class="source-info">
-        Source: {{ session()?.source }}
+        Source: {{ session()?.sourceContext?.source }}
       </div>
     </header>
 
@@ -59,13 +59,18 @@
             <span class="time">{{ activity.createTime | date:'shortTime' }}</span>
           </div>
           <div class="activity-text">
-            <!-- {{ activity.text }} -->
+             {{ getActivityMessage(activity) }}
           </div>
         </div>
 
         <div *ngIf="activities().length === 0" class="no-activity">
           Initializing session...
         </div>
+      </div>
+
+      <div *ngIf="isAwaitingApproval()" class="approval-bar">
+        <p>A plan has been generated and is awaiting your approval.</p>
+        <button class="btn-approve" (click)="approvePlan()">Approve Plan</button>
       </div>
 
       <!-- Chat Input -->

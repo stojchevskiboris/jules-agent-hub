@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { JulesApiService } from '../../services/jules-api.service';
-import { Session } from '../../models/jules.models';
+import { Session, SessionState } from '../../models/jules.models';
 
 @Component({
   selector: 'app-task-board',
@@ -18,24 +18,36 @@ export class TaskBoardComponent implements OnInit {
   loading = signal<boolean>(true);
   selectedState = signal<string>('ALL');
 
-  availableStates = ['ALL', 'ACTIVE', 'COMPLETED', 'FAILED', 'CANCELLED'];
+  availableStates = ['ALL', 'ACTIVE', 'COMPLETED', 'FAILED'];
 
   filteredSessions = computed(() => {
     const all = this.sessions();
     const filter = this.selectedState();
     if (filter === 'ALL') return all;
     if (filter === 'ACTIVE') {
-      return all.filter(s => s.state === 'ACTIVE' || s.state === 'OPEN' || !s.state);
+      return all.filter(s =>
+        s.state === SessionState.QUEUED ||
+        s.state === SessionState.PLANNING ||
+        s.state === SessionState.AWAITING_PLAN_APPROVAL ||
+        s.state === SessionState.AWAITING_USER_FEEDBACK ||
+        s.state === SessionState.IN_PROGRESS
+      );
     }
     return all.filter(s => s.state === filter);
   });
 
   activeTasks = computed(() =>
-    this.filteredSessions().filter(s => s.state === 'ACTIVE' || s.state === 'OPEN' || !s.state)
+    this.sessions().filter(s =>
+      s.state === SessionState.QUEUED ||
+      s.state === SessionState.PLANNING ||
+      s.state === SessionState.AWAITING_PLAN_APPROVAL ||
+      s.state === SessionState.AWAITING_USER_FEEDBACK ||
+      s.state === SessionState.IN_PROGRESS
+    )
   );
 
   archivedTasks = computed(() =>
-    this.filteredSessions().filter(s => s.state !== 'ACTIVE' && s.state !== 'OPEN' && !!s.state)
+    this.sessions().filter(s => s.state === SessionState.COMPLETED || s.state === SessionState.FAILED)
   );
 
   ngOnInit() {
@@ -68,5 +80,9 @@ export class TaskBoardComponent implements OnInit {
 
   setStateFilter(state: string) {
     this.selectedState.set(state);
+  }
+
+  getPullRequest(session: Session) {
+    return session.outputs?.find(o => o.pullRequest)?.pullRequest;
   }
 }

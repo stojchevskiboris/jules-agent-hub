@@ -1,15 +1,15 @@
 import { Component, OnInit, OnDestroy, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { JulesApiService } from '../../services/jules-api.service';
-import { Session, Activity } from '../../models/jules.models';
+import { Session, Activity, AutomationMode, SessionState } from '../../models/jules.models';
 
 @Component({
   selector: 'app-workspace',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './workspace.component.html',
   styleUrl: './workspace.component.scss'
 })
@@ -23,7 +23,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   activities = signal<Activity[]>([]);
 
   newPrompt = signal<string>('');
-  automationMode = signal<'AUTO_CREATE_PR' | 'NONE'>('NONE');
+  automationMode = signal<AutomationMode>(AutomationMode.AUTOMATION_MODE_UNSPECIFIED);
   chatMessage = signal<string>('');
 
   loading = signal<boolean>(false);
@@ -111,5 +111,32 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   getShortName(fullName: string): string {
     return fullName.split('/').pop() || fullName;
+  }
+
+  getActivityMessage(activity: Activity): string {
+    if (activity.userMessaged) return activity.userMessaged.userMessage;
+    if (activity.agentMessaged) return activity.agentMessaged.agentMessage;
+    if (activity.planGenerated) return 'Generated a new plan.';
+    if (activity.progressUpdated) return `${activity.progressUpdated.title}: ${activity.progressUpdated.description}`;
+    if (activity.sessionCompleted) return 'Session completed successfully.';
+    if (activity.sessionFailed) return `Session failed: ${activity.sessionFailed.reason}`;
+    return activity.description || '';
+  }
+
+  approvePlan() {
+    const id = this.activeSessionId();
+    if (!id) return;
+    this.apiService.approvePlan(id).subscribe({
+      next: () => this.fetchSession(id),
+      error: (err) => console.error(err)
+    });
+  }
+
+  isAwaitingApproval() {
+    return this.session()?.state === SessionState.AWAITING_PLAN_APPROVAL;
+  }
+
+  setAutomationMode(checked: boolean) {
+    this.automationMode.set(checked ? AutomationMode.AUTO_CREATE_PR : AutomationMode.AUTOMATION_MODE_UNSPECIFIED);
   }
 }

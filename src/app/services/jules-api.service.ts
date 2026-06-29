@@ -23,10 +23,15 @@ export class JulesApiService {
     return this.http.get<ListSessionsResponse>(`${this.baseUrl}/sessions`);
   }
 
-  createSession(sourceName: string, instruction: string, automationMode: string = 'NONE'): Observable<Session> {
+  createSession(sourceName: string, prompt: string, automationMode: string = 'AUTOMATION_MODE_UNSPECIFIED', startingBranch: string = 'main'): Observable<Session> {
     return this.http.post<Session>(`${this.baseUrl}/sessions`, {
-      source: sourceName,
-      instruction,
+      prompt,
+      sourceContext: {
+        source: sourceName,
+        githubRepoContext: {
+          startingBranch
+        }
+      },
       automationMode
     });
   }
@@ -40,10 +45,14 @@ export class JulesApiService {
     return this.http.get<ListActivitiesResponse>(`${this.baseUrl}/${sessionId}/activities`);
   }
 
-  sendMessage(sessionId: string, message: string): Observable<void> {
+  sendMessage(sessionId: string, prompt: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${sessionId}:sendMessage`, {
-      message
+      prompt
     });
+  }
+
+  approvePlan(sessionId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${sessionId}:approvePlan`, {});
   }
 
   pollSessionActivities(sessionId: string, intervalMs: number = 5000): Observable<ListActivitiesResponse> {
