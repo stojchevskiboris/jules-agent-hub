@@ -1,6 +1,17 @@
 <div class="task-board-container">
   <header class="page-header">
-    <h2>Task Board</h2>
+    <div class="title-section">
+      <h2>Task Board</h2>
+      <div class="filters">
+        <button
+          *ngFor="let state of availableStates"
+          [class.active]="selectedState() === state"
+          (click)="setStateFilter(state)"
+          class="filter-btn">
+          {{ state | titlecase }}
+        </button>
+      </div>
+    </div>
     <button class="btn-refresh" (click)="loadSessions()">Refresh</button>
   </header>
 
@@ -16,15 +27,26 @@
         <span class="count">{{ activeTasks().length }}</span>
       </div>
       <div class="task-list">
-        <div *ngFor="let task of activeTasks()" class="task-card">
+        <div
+          *ngFor="let task of activeTasks()"
+          class="task-card"
+          [routerLink]="['/workspace']"
+          [queryParams]="{ sessionId: task.name }">
           <div class="task-header">
             <span class="task-id">#{{ getShortName(task.name) }}</span>
-            <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state }}</span>
+            <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state || 'ACTIVE' }}</span>
           </div>
+          <h4 class="task-title">{{ truncateTitle(task.title) }}</h4>
           <p class="task-instruction">{{ task.instruction }}</p>
+          <div class="task-meta">
+            <div class="time-info">
+              <span>Created: {{ task.createTime | date:'short' }}</span>
+              <span>Updated: {{ task.updateTime | date:'short' }}</span>
+            </div>
+          </div>
           <div class="task-footer">
             <span class="task-source">{{ task.source }}</span>
-            <a [routerLink]="['/workspace']" [queryParams]="{ sessionId: task.name }" class="btn-open">Open</a>
+            <span class="btn-open">Open</span>
           </div>
         </div>
       </div>
@@ -32,21 +54,34 @@
 
     <section class="task-column">
       <div class="column-header">
-        <h3>Completed Tasks</h3>
+        <h3>Archived Tasks</h3>
         <span class="count">{{ archivedTasks().length }}</span>
       </div>
       <div class="task-list">
-        <div *ngFor="let task of archivedTasks()" class="task-card completed">
+        <div
+          *ngFor="let task of archivedTasks()"
+          class="task-card completed"
+          [routerLink]="['/workspace']"
+          [queryParams]="{ sessionId: task.name }">
           <div class="task-header">
             <span class="task-id">#{{ getShortName(task.name) }}</span>
-            <span class="task-state success">COMPLETED</span>
+            <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state }}</span>
           </div>
+          <h4 class="task-title">{{ truncateTitle(task.title) }}</h4>
           <p class="task-instruction">{{ task.instruction }}</p>
+          <div class="task-meta">
+            <div class="time-info">
+              <span>Created: {{ task.createTime | date:'short' }}</span>
+              <span>Updated: {{ task.updateTime | date:'short' }}</span>
+            </div>
+          </div>
           <div class="task-footer">
-            <a [href]="task.outputs?.pullRequest?.url" target="_blank" class="pr-link">
-              View PR #{{ task.outputs?.pullRequest?.number }}
-            </a>
-            <a [routerLink]="['/workspace']" [queryParams]="{ sessionId: task.name }" class="btn-open">Details</a>
+            <ng-container *ngIf="task.outputs?.pullRequest as pr">
+              <a [href]="pr.url" target="_blank" class="pr-link" (click)="$event.stopPropagation()">
+                View PR #{{ pr.number }}
+              </a>
+            </ng-container>
+            <span class="btn-open">Details</span>
           </div>
         </div>
       </div>

@@ -2,7 +2,10 @@
   <!-- Session Creator (Visible when no active session) -->
   <div *ngIf="!activeSessionId() && selectedSource()" class="session-creator">
     <div class="creator-card">
-      <h2>Start New Task</h2>
+      <div class="card-header">
+        <a routerLink="/tasks" class="btn-back">← Back to Tasks</a>
+        <h2>Start New Task</h2>
+      </div>
       <p class="subtitle">Repository: {{ selectedSource() }}</p>
 
       <div class="form-group">
@@ -32,6 +35,7 @@
 
   <div *ngIf="!activeSessionId() && !selectedSource()" class="empty-state">
     <div class="message">
+      <a routerLink="/tasks" class="btn-back-floating">← Back to Tasks</a>
       <i class="icon">👈</i>
       <h3>Select a repository to get started</h3>
     </div>
@@ -41,6 +45,7 @@
   <div *ngIf="activeSessionId()" class="active-workspace">
     <header class="workspace-header">
       <div class="session-info">
+        <a routerLink="/tasks" class="btn-back-icon" title="Back to Task Board">←</a>
         <h3>Session #{{ getShortName(activeSessionId()!) }}</h3>
         <span class="status-badge" [class]="session()?.state?.toLowerCase()">{{ session()?.state }}</span>
       </div>
