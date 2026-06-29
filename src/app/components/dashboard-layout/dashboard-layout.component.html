@@ -14,6 +14,15 @@
       </a>
     </nav>
 
+    <div class="sessions-section">
+      <h3>Recent Sessions</h3>
+      <ul class="sessions-list">
+        <li *ngFor="let session of sessions().slice(0, 5)" (click)="selectSession(session)" class="session-item">
+          <span class="session-name">{{ truncateTitle(session.title || getShortName(session.name), 30) }}</span>
+        </li>
+      </ul>
+    </div>
+
     <div class="sources-section">
       <h3>Repositories</h3>
       <div *ngIf="loading()" class="loader">Loading...</div>

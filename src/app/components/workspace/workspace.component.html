@@ -41,7 +41,7 @@
     <header class="workspace-header">
       <div class="session-info">
         <a routerLink="/tasks" class="btn-back-icon" title="Back to Task Board">←</a>
-        <h3>Session #{{ getShortName(activeSessionId()!) }}</h3>
+        <h3>{{ truncateTitle(session()?.title || getShortName(session()?.name || ''), 30) }}</h3>
         <span class="status-badge" [class]="session()?.state?.toLowerCase()">{{ session()?.state }}</span>
       </div>
       <div class="source-info">
@@ -59,7 +59,7 @@
             <span class="time">{{ activity.createTime | date:'shortTime' }}</span>
           </div>
           <div class="activity-text">
-             {{ getActivityMessage(activity) }}
+            {{ getActivityMessage(activity) }}
           </div>
         </div>
 
