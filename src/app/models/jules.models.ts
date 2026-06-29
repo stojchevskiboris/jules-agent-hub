@@ -2,6 +2,7 @@ export interface Source {
   name: string;
   displayName?: string;
   repositoryUrl?: string;
+  githubRepo?: any;
 }
 
 export interface ListSourcesResponse {

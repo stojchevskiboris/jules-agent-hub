@@ -19,10 +19,8 @@
       <div *ngIf="loading()" class="loader">Loading...</div>
       <div *ngIf="error()" class="error">{{ error() }}</div>
       <ul class="sources-list">
-        <li *ngFor="let source of sources()"
-            (click)="selectSource(source)"
-            class="source-item">
-          <span class="source-name">{{ source.displayName || source.name }}</span>
+        <li *ngFor="let source of sources()" (click)="selectSource(source)" class="source-item">
+          <span class="source-name">{{ source.githubRepo.repo || source.displayName || source.name }}</span>
         </li>
       </ul>
     </div>
