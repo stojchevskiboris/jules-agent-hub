@@ -42,3 +42,24 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: #484f58;
 }
+
+/* Responsive Utilities */
+.mobile-only {
+  @media (min-width: 768px) {
+    display: none !important;
+  }
+}
+
+.desktop-only {
+  @media (max-width: 767px) {
+    display: none !important;
+  }
+}
+
+/* Base Responsive Adjustments */
+html {
+  font-size: 14px;
+  @media (min-width: 768px) {
+    font-size: 16px;
+  }
+}

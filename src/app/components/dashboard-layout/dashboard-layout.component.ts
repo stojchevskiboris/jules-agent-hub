@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { JulesApiService } from '../../services/jules-api.service';
 import { Source, Session } from '../../models/jules.models';
 
@@ -19,10 +20,18 @@ export class DashboardLayoutComponent implements OnInit {
   sessions = signal<Session[]>([]);
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
+  sidebarOpen = signal<boolean>(false);
 
   ngOnInit() {
     this.loadSources();
     this.loadSessions();
+
+    // Close sidebar on route change
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.sidebarOpen.set(false);
+    });
   }
 
   loadSources(pageToken?: string, accumulatedSources: Source[] = []) {
@@ -63,6 +72,14 @@ export class DashboardLayoutComponent implements OnInit {
         console.error('Failed to load sessions', err);
       }
     });
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen.update(v => !v);
+  }
+
+  closeSidebar() {
+    this.sidebarOpen.set(false);
   }
 
   selectSource(source: Source) {

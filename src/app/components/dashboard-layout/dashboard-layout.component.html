@@ -1,5 +1,18 @@
 <div class="dashboard-container">
-  <aside class="sidebar">
+  <!-- Mobile Header -->
+  <header class="mobile-header">
+    <button class="menu-btn" (click)="toggleSidebar()">
+      <span class="hamburger"></span>
+    </button>
+    <h1 class="mobile-title">Jules Hub</h1>
+    <button class="btn-api-key-small" (click)="setApiKey()">API</button>
+  </header>
+
+  <!-- Sidebar Backdrop -->
+  <div class="sidebar-backdrop" *ngIf="sidebarOpen()" (click)="closeSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen()">
     <div class="sidebar-header">
       <h1>Jules Hub</h1>
       <button class="btn-api-key" (click)="setApiKey()">API Key</button>

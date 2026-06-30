@@ -3,6 +3,83 @@
   height: 100vh;
   background-color: #0d1117;
   color: #c9d1d9;
+  flex-direction: column;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
+}
+
+.mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background-color: #161b22;
+  border-bottom: 1px solid #30363d;
+  z-index: 100;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+
+  .mobile-title {
+    font-size: 1.1rem;
+    margin: 0;
+    color: #58a6ff;
+  }
+
+  .menu-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+
+    .hamburger {
+      width: 20px;
+      height: 2px;
+      background-color: #c9d1d9;
+      position: relative;
+      display: block;
+
+      &::before, &::after {
+        content: '';
+        width: 20px;
+        height: 2px;
+        background-color: #c9d1d9;
+        position: absolute;
+        left: 0;
+      }
+
+      &::before { top: -6px; }
+      &::after { bottom: -6px; }
+    }
+  }
+
+  .btn-api-key-small {
+    background-color: #21262d;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+  }
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
 }
 
 .sidebar {
@@ -13,6 +90,22 @@
   flex-direction: column;
   padding: 1rem;
   overflow-y: auto;
+  position: fixed;
+  top: 0;
+  left: -280px;
+  height: 100vh;
+  z-index: 999;
+  transition: left 0.3s ease-in-out;
+
+  &.open {
+    left: 0;
+  }
+
+  @media (min-width: 768px) {
+    position: static;
+    left: 0;
+    height: auto;
+  }
 
   .sidebar-header {
     display: flex;
@@ -70,7 +163,7 @@
     }
   }
 
-  .sessions-section {
+  .sessions-section, .sources-section {
     margin-bottom: 2rem;
 
     h3 {
@@ -80,12 +173,12 @@
       margin-bottom: 1rem;
     }
 
-    .sessions-list {
+    ul {
       list-style: none;
       padding: 0;
       margin: 0;
 
-      .session-item {
+      li {
         padding: 0.5rem 0.75rem;
         border-radius: 6px;
         cursor: pointer;
@@ -96,41 +189,7 @@
           background-color: #21262d;
         }
 
-        .session-name {
-          display: block;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-      }
-    }
-  }
-
-  .sources-section {
-    h3 {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      color: #8b949e;
-      margin-bottom: 1rem;
-    }
-
-    .sources-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-
-      .source-item {
-        padding: 0.5rem 0.75rem;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 0.9rem;
-        transition: background 0.2s;
-
-        &:hover {
-          background-color: #21262d;
-        }
-
-        .source-name {
+        span {
           display: block;
           overflow: hidden;
           text-overflow: ellipsis;
