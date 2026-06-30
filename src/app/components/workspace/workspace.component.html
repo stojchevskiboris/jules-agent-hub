@@ -55,7 +55,13 @@
         <div *ngFor="let activity of activities()" class="activity-item"
           [class.user-msg]="activity.originator === 'user'" [class.agent-msg]="activity.originator !== 'user'">
           <div class="activity-meta">
-            <span class="author">{{ activity.originator === 'user' ? 'You' : 'Jules' }}</span>
+            <span class="author">
+              <ng-container [ngSwitch]="activity.originator">
+                <span *ngSwitchCase="'user'">You</span>
+                <span *ngSwitchCase="'system'">System</span>
+                <span *ngSwitchDefault>Jules</span>
+              </ng-container>
+            </span>
             <span class="time">{{ activity.createTime | date:'shortTime' }}</span>
           </div>
           <div class="activity-text">

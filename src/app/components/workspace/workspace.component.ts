@@ -121,9 +121,32 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (activity.userMessaged) return activity.userMessaged.userMessage;
     if (activity.agentMessaged) return activity.agentMessaged.agentMessage;
     if (activity.planGenerated) return 'Generated a new plan.';
-    if (activity.progressUpdated) return `${activity.progressUpdated.title}: ${activity.progressUpdated.description}`;
-    if (activity.sessionCompleted) return 'Session completed successfully.';
+    if (activity.planApproved) return 'Plan approved.';
+
+    if (activity.progressUpdated) {
+      const title = activity.progressUpdated.title;
+      const desc = activity.progressUpdated.description;
+      if (title && desc) return `${title}: ${desc}`;
+      if (title) return title;
+      if (desc) return desc;
+      return activity.description || '';
+    }
+
+    if (activity.artifacts && activity.artifacts.length > 0) {
+      const artifact = activity.artifacts[0];
+      if (artifact.changeSet) {
+        return `Code changes: ${artifact.changeSet.gitPatch.suggestedCommitMessage}`;
+      }
+      if (artifact.bashOutput) {
+        return `Ran command: ${artifact.bashOutput.command}`;
+      }
+    }
+
+    if (activity.sessionCompleted !== undefined && activity.sessionCompleted !== null) {
+      return 'Session completed successfully.';
+    }
     if (activity.sessionFailed) return `Session failed: ${activity.sessionFailed.reason}`;
+
     return activity.description || '';
   }
 
