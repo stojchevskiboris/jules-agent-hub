@@ -5,7 +5,9 @@
       <span class="hamburger"></span>
     </button>
     <h1 class="mobile-title">Jules Hub</h1>
-    <button class="btn-api-key-small" (click)="setApiKey()">API</button>
+    <button class="btn-api-key-small" (click)="setApiKey()">
+      API <span *ngIf="apiKeyValid()" class="checkmark">✓</span>
+    </button>
   </header>
 
   <!-- Sidebar Backdrop -->
@@ -15,7 +17,9 @@
   <aside class="sidebar" [class.open]="sidebarOpen()">
     <div class="sidebar-header">
       <h1>Jules Hub</h1>
-      <button class="btn-api-key" (click)="setApiKey()">API Key</button>
+      <button class="btn-api-key" (click)="setApiKey()">
+        API Key <span *ngIf="apiKeyValid()" class="checkmark">✓</span>
+      </button>
     </div>
 
     <nav class="nav-links">
@@ -39,7 +43,7 @@
     <div class="sources-section">
       <h3>Repositories</h3>
       <div *ngIf="loading()" class="loader">Loading...</div>
-      <div *ngIf="error()" class="error">{{ error() }}</div>
+      <div *ngIf="error() && error() !== API_KEY_ERROR" class="error">{{ error() }}</div>
       <ul class="sources-list">
         <li *ngFor="let source of sources()" (click)="selectSource(source)" class="source-item">
           <span class="source-name">{{ source.githubRepo.repo || source.name }}</span>
@@ -49,6 +53,11 @@
   </aside>
 
   <main class="main-content">
-    <router-outlet></router-outlet>
+    <div *ngIf="error() === API_KEY_ERROR" class="error-banner">
+      <h2>API Key Required</h2>
+      <p>A Jules API key is needed to access the dashboard and repositories.</p>
+      <button class="btn-api-key-large" (click)="setApiKey()">Enter API Key</button>
+    </div>
+    <router-outlet *ngIf="error() !== API_KEY_ERROR"></router-outlet>
   </main>
 </div>

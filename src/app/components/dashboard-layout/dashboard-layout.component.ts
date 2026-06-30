@@ -1,9 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { filter } from 'rxjs/operators';
 import { JulesApiService } from '../../services/jules-api.service';
 import { Source, Session } from '../../models/jules.models';
+
+const API_KEY_ERROR_MESSAGE = 'Jules API key is needed';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -21,8 +24,13 @@ export class DashboardLayoutComponent implements OnInit {
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
   sidebarOpen = signal<boolean>(false);
+  apiKeyValid = signal<boolean>(false);
+
+  // Expose constant to template
+  protected readonly API_KEY_ERROR = API_KEY_ERROR_MESSAGE;
 
   ngOnInit() {
+    this.checkApiKey();
     this.loadSources();
     this.loadSessions();
 
@@ -32,6 +40,18 @@ export class DashboardLayoutComponent implements OnInit {
     ).subscribe(() => {
       this.sidebarOpen.set(false);
     });
+  }
+
+  private checkApiKey() {
+    try {
+      const apiKey = localStorage.getItem('JULES_API_KEY');
+      if (!apiKey) {
+        this.error.set(API_KEY_ERROR_MESSAGE);
+      }
+    } catch (e) {
+      this.error.set(API_KEY_ERROR_MESSAGE);
+      console.error('Failed to access localStorage', e);
+    }
   }
 
   loadSources(pageToken?: string, accumulatedSources: Source[] = []) {
@@ -46,10 +66,17 @@ export class DashboardLayoutComponent implements OnInit {
         } else {
           this.sources.set(currentSources);
           this.loading.set(false);
+          this.apiKeyValid.set(true);
+          this.error.set(null);
         }
       },
       error: (err) => {
-        this.error.set('Failed to load repositories');
+        if (err instanceof HttpErrorResponse && (err.status === 401 || err.status === 403)) {
+          this.error.set(API_KEY_ERROR_MESSAGE);
+          this.apiKeyValid.set(false);
+        } else {
+          this.error.set('Failed to load repositories');
+        }
         this.loading.set(false);
         console.error(err);
       }
