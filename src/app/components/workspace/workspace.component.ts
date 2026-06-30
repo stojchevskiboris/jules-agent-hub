@@ -18,6 +18,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
 
   selectedSource = signal<string | null>(null);
+  defaultBranch = signal<string | null>(null);
   activeSessionId = signal<string | null>(null);
   session = signal<Session | null>(null);
   activities = signal<Activity[]>([]);
@@ -48,6 +49,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.activeSessionId.set(null);
         this.activities.set([]);
       }
+      if (params['defaultBranch']) {
+        this.defaultBranch.set(params['defaultBranch']);
+      }
       if (params['sessionId']) {
         this.activeSessionId.set(params['sessionId']);
       }
@@ -64,7 +68,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (!source || !prompt) return;
 
     this.loading.set(true);
-    this.apiService.createSession(source, prompt, this.automationMode()).subscribe({
+    this.apiService.createSession(source, prompt, this.automationMode(), this.defaultBranch() || undefined).subscribe({
       next: (session) => {
         this.activeSessionId.set(session.name);
         this.newPrompt.set('');

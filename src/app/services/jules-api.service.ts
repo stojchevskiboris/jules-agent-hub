@@ -24,17 +24,20 @@ export class JulesApiService {
     return this.http.get<ListSessionsResponse>(`${this.baseUrl}/sessions`);
   }
 
-  createSession(sourceName: string, prompt: string, automationMode: string = 'AUTOMATION_MODE_UNSPECIFIED', startingBranch: string = 'main'): Observable<Session> {
-    return this.http.post<Session>(`${this.baseUrl}/sessions`, {
+  createSession(sourceName: string, prompt: string, automationMode: string = 'AUTOMATION_MODE_UNSPECIFIED', startingBranch?: string): Observable<Session> {
+    const body: any = {
       prompt,
       sourceContext: {
-        source: sourceName,
-        githubRepoContext: {
-          startingBranch
-        }
+        source: sourceName
       },
       automationMode
-    });
+    };
+
+    if (startingBranch) {
+      body.sourceContext.githubRepoContext = { startingBranch };
+    }
+
+    return this.http.post<Session>(`${this.baseUrl}/sessions`, body);
   }
 
   getSession(sessionId: string): Observable<Session> {

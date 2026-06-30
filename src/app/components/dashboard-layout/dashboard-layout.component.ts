@@ -84,7 +84,7 @@ export class DashboardLayoutComponent implements OnInit {
 
   selectSource(source: Source) {
     // Navigate to workspace with source as parameter
-    this.router.navigate(['/workspace'], { queryParams: { source: source.name } });
+    this.router.navigate(['/workspace'], { queryParams: { source: source.name, defaultBranch: source.githubRepo.defaultBranch.displayName } });
   }
 
   selectSession(session: Session) {
