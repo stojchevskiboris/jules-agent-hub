@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal, effect } from '@angular/c
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, interval, startWith } from 'rxjs';
 import { JulesApiService } from '../../services/jules-api.service';
 import { Session, Activity, AutomationMode, SessionState } from '../../models/jules.models';
 
