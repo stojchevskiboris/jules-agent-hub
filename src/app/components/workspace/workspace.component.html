@@ -52,14 +52,59 @@
     <div class="workspace-layout">
       <!-- Activity Timeline -->
       <div class="activity-feed" #scrollContainer>
-        <div *ngFor="let activity of activities()" class="activity-item"
+        <div *ngFor="let activity of activities(); trackBy: trackByActivityId" class="activity-item"
           [class.user-msg]="activity.originator === 'user'" [class.agent-msg]="activity.originator !== 'user'">
           <div class="activity-meta">
-            <span class="author">{{ activity.originator === 'user' ? 'You' : 'Jules' }}</span>
+            <span class="author">
+              <ng-container [ngSwitch]="activity.originator">
+                <span *ngSwitchCase="'user'">You</span>
+                <span *ngSwitchCase="'system'">System</span>
+                <span *ngSwitchDefault>Jules</span>
+              </ng-container>
+            </span>
             <span class="time">{{ activity.createTime | date:'shortTime' }}</span>
           </div>
           <div class="activity-text">
-            {{ getActivityMessage(activity) }}
+            <div class="message-content">{{ getActivityMessage(activity) }}</div>
+
+            <!-- Rich Plan Display -->
+            <div *ngIf="activity.planGenerated" class="plan-details">
+              <ul class="plan-steps">
+                <li *ngFor="let step of activity.planGenerated.plan.steps">
+                  <strong>Step {{ step.index + 1 }}: {{ step.title }}</strong>
+                  <p>{{ step.description }}</p>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Artifacts Display -->
+            <div *ngIf="activity.artifacts && activity.artifacts.length > 0" class="artifacts-container">
+              <div *ngFor="let artifact of activity.artifacts" class="artifact-item">
+                <div *ngIf="artifact.bashOutput" class="bash-artifact">
+                  <div class="artifact-header">Bash Output ({{ artifact.bashOutput.command }})</div>
+                  <pre class="bash-code"><code>{{ artifact.bashOutput.output }}</code></pre>
+                </div>
+                <div *ngIf="artifact.changeSet" class="changeset-artifact">
+                  <div class="artifact-header">Suggested Changes</div>
+                  <div class="diff-accordion">
+                    <details *ngFor="let file of parseDiff(artifact.changeSet.gitPatch.unidiffPatch)" class="file-diff">
+                      <summary>Changes in /{{ file.fileName }}</summary>
+                      <div class="diff-content">
+                        <div *ngFor="let line of file.lines" class="diff-line" [class]="line.type">
+                          <span class="line-text">{{ line.text }}</span>
+                        </div>
+                      </div>
+                    </details>
+                  </div>
+                </div>
+                <div *ngIf="artifact.media" class="media-artifact">
+                  <div class="artifact-header">Media: {{ artifact.media.mimeType }}</div>
+                  <div *ngIf="artifact.media.mimeType.startsWith('image/')" class="media-preview">
+                    <img [src]="'data:' + artifact.media.mimeType + ';base64,' + artifact.media.data" alt="Artifact media">
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
