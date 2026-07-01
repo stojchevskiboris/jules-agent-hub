@@ -52,7 +52,7 @@
     <div class="workspace-layout">
       <!-- Activity Timeline -->
       <div class="activity-feed" #scrollContainer>
-        <div *ngFor="let activity of activities()" class="activity-item"
+        <div *ngFor="let activity of activities(); trackBy: trackByActivityId" class="activity-item"
           [class.user-msg]="activity.originator === 'user'" [class.agent-msg]="activity.originator !== 'user'">
           <div class="activity-meta">
             <span class="author">

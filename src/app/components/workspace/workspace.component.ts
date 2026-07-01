@@ -22,6 +22,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   activeSessionId = signal<string | null>(null);
   session = signal<Session | null>(null);
   activities = signal<Activity[]>([]);
+  nextPageToken = signal<string | undefined>(undefined);
 
   newPrompt = signal<string>('');
   automationMode = signal<AutomationMode>(AutomationMode.AUTOMATION_MODE_UNSPECIFIED);
@@ -53,6 +54,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.defaultBranch.set(params['defaultBranch']);
       }
       if (params['sessionId']) {
+        if (this.activeSessionId() !== params['sessionId']) {
+          this.activities.set([]);
+          this.nextPageToken.set(undefined);
+        }
         this.activeSessionId.set(params['sessionId']);
       }
     });
@@ -87,9 +92,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   startPolling(id: string) {
     this.stopPolling();
-    this.pollingSub = this.apiService.pollSessionActivities(id).subscribe({
+    this.pollingSub = this.apiService.pollSessionActivities(id, () => this.nextPageToken()).subscribe({
       next: (res) => {
-        this.activities.set(res.activities || []);
+        if (res.activities && res.activities.length > 0) {
+          this.activities.update(current => [...current, ...(res.activities || [])]);
+        }
+        if (res.nextPageToken) {
+          this.nextPageToken.set(res.nextPageToken);
+        }
       },
       error: (err) => console.error(err)
     });
@@ -182,6 +192,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (!title) return 'No title';
     if (title.length <= maxLength) return title;
     return title.substring(0, maxLength) + '...';
+  }
+
+  trackByActivityId(index: number, activity: Activity): string {
+    return activity.id;
   }
 
   parseDiff(patch: string): { fileName: string; lines: { text: string; type: string }[] }[] {

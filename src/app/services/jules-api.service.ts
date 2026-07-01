@@ -44,9 +44,13 @@ export class JulesApiService {
     return this.http.get<Session>(`${this.baseUrl}/${sessionId}`);
   }
 
-  getSessionActivities(sessionId: string): Observable<ListActivitiesResponse> {
+  getSessionActivities(sessionId: string, pageToken?: string): Observable<ListActivitiesResponse> {
     // sessionId should be in format 'sessions/{id}'
-    return this.http.get<ListActivitiesResponse>(`${this.baseUrl}/${sessionId}/activities`);
+    let url = `${this.baseUrl}/${sessionId}/activities`;
+    if (pageToken) {
+      url += `?pageToken=${pageToken}`;
+    }
+    return this.http.get<ListActivitiesResponse>(url);
   }
 
   sendMessage(sessionId: string, prompt: string): Observable<void> {
@@ -59,10 +63,10 @@ export class JulesApiService {
     return this.http.post<void>(`${this.baseUrl}/${sessionId}:approvePlan`, {});
   }
 
-  pollSessionActivities(sessionId: string, intervalMs: number = 5000): Observable<ListActivitiesResponse> {
+  pollSessionActivities(sessionId: string, getPageToken: () => string | undefined, intervalMs: number = 5000): Observable<ListActivitiesResponse> {
     return interval(intervalMs).pipe(
       startWith(0),
-      switchMap(() => this.getSessionActivities(sessionId))
+      switchMap(() => this.getSessionActivities(sessionId, getPageToken()))
     );
   }
 }
