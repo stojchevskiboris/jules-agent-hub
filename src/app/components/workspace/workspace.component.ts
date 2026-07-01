@@ -105,7 +105,11 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.apiService.getSessionActivities(id, this.nextPageToken()).subscribe({
       next: (res) => {
         if (res.activities && res.activities.length > 0) {
-          this.activities.update(current => [...current, ...(res.activities || [])]);
+          this.activities.update(current => {
+            const existingIds = new Set(current.map(a => a.id));
+            const newActivities = (res.activities || []).filter(a => !existingIds.has(a.id));
+            return [...current, ...newActivities];
+          });
         }
 
         const newToken = res.nextPageToken;
@@ -115,8 +119,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           // Recursive call to get next page immediately
           this.pollCycle(id);
         } else {
-          // No more pages for this cycle
+          // Stop polling if token is same or missing (per user request)
+          this.stopPolling();
           this.lastPageToken = newToken;
+        }
+
+        // Final refresh and stop if terminal activity found
+        if (res.activities && res.activities.some(a => a.sessionCompleted || a.sessionFailed)) {
+          this.stopPolling();
+          this.fetchSession(id);
         }
       },
       error: (err) => console.error(err)
