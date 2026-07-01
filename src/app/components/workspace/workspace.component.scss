@@ -475,3 +475,18 @@
   input:checked + .slider { background-color: #238636; }
   input:checked + .slider:before { transform: translateX(14px); }
 }
+
+.btn-pr {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 10px;
+  background: #1f6feb;
+  color: white;
+  text-decoration: none;
+  text-transform: uppercase;
+  font-weight: 600;
+  white-space: nowrap;
+  &:hover {
+    background: #388bfd;
+  }
+}

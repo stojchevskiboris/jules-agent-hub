@@ -43,6 +43,7 @@
         <a routerLink="/tasks" class="btn-back-icon" title="Back to Task Board">←</a>
         <h3>{{ truncateTitle(session()?.title || getShortName(session()?.name || ''), 30) }}</h3>
         <span class="status-badge" [class]="session()?.state?.toLowerCase()">{{ session()?.state }}</span>
+        <a *ngIf="getPullRequestUrl()" [href]="getPullRequestUrl()" target="_blank" class="btn-pr">View PR</a>
       </div>
       <div class="source-info">
         Source: {{ session()?.sourceContext?.source }}
