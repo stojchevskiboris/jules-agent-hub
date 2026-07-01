@@ -406,6 +406,7 @@
     .chat-input-wrapper {
       display: flex;
       gap: 0.5rem;
+      align-items: flex-end;
       background: #0d1117;
       border: 1px solid #30363d;
       border-radius: 6px;
@@ -416,13 +417,19 @@
         padding: 0.5rem;
       }
 
-      input {
+      textarea {
         flex: 1;
         background: transparent;
         border: none;
         color: #c9d1d9;
         padding: 0.5rem;
         font-size: 0.9rem;
+        font-family: inherit;
+        resize: none;
+        min-height: 24px;
+        max-height: 200px;
+        overflow-y: auto;
+        line-height: 1.4;
         &:focus { outline: none; }
       }
 

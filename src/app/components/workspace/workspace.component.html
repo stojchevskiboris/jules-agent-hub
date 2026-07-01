@@ -121,9 +121,12 @@
       <!-- Chat Input -->
       <footer class="chat-footer">
         <div class="chat-input-wrapper">
-          <input type="text" [(ngModel)]="chatMessage" (keyup.enter)="sendChatMessage()"
-            placeholder="Type a message to the agent...">
-          <button class="btn-send" (click)="sendChatMessage()" [disabled]="!chatMessage()">
+          <textarea #chatInput [(ngModel)]="chatMessage"
+            (keydown)="onKeyDown($event)"
+            (input)="adjustHeight(chatInput)"
+            placeholder="Type a message to the agent..."
+            rows="1"></textarea>
+          <button class="btn-send" (click)="sendChatMessage(chatInput)" [disabled]="!chatMessage()">
             Send
           </button>
         </div>

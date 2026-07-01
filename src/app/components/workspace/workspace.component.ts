@@ -138,7 +138,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.pollingSub?.unsubscribe();
   }
 
-  sendChatMessage() {
+  sendChatMessage(textareaElement?: HTMLTextAreaElement) {
     const id = this.activeSessionId();
     const msg = this.chatMessage();
     if (!id || !msg) return;
@@ -147,9 +147,34 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       next: () => {
         this.chatMessage.set('');
         // Optimization: immediately poll or wait for next interval
+
+        // Reset textarea height after sending
+        setTimeout(() => {
+          if (textareaElement) {
+            textareaElement.style.height = 'auto';
+          } else {
+            const textarea = document.querySelector('.chat-input-wrapper textarea') as HTMLTextAreaElement;
+            if (textarea) {
+              textarea.style.height = 'auto';
+            }
+          }
+        }, 0);
       },
       error: (err) => console.error(err)
     });
+  }
+
+  adjustHeight(textarea: HTMLTextAreaElement) {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
+
+  onKeyDown(event: Event) {
+    const keyboardEvent = event as KeyboardEvent;
+    if (keyboardEvent.key === 'Enter' && !keyboardEvent.shiftKey) {
+      event.preventDefault();
+      this.sendChatMessage(event.target as HTMLTextAreaElement);
+    }
   }
 
   getShortName(fullName: string): string {
