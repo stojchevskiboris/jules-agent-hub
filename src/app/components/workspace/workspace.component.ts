@@ -23,6 +23,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   session = signal<Session | null>(null);
   activities = signal<Activity[]>([]);
   nextPageToken = signal<string | undefined>(undefined);
+  lastPageToken: string | undefined = undefined;
 
   newPrompt = signal<string>('');
   automationMode = signal<AutomationMode>(AutomationMode.AUTOMATION_MODE_UNSPECIFIED);
@@ -92,13 +93,30 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   startPolling(id: string) {
     this.stopPolling();
-    this.pollingSub = this.apiService.pollSessionActivities(id, () => this.nextPageToken()).subscribe({
+    // Use interval to trigger a poll cycle
+    this.pollingSub = interval(5000).pipe(
+      startWith(0)
+    ).subscribe(() => {
+      this.pollCycle(id);
+    });
+  }
+
+  private pollCycle(id: string) {
+    this.apiService.getSessionActivities(id, this.nextPageToken()).subscribe({
       next: (res) => {
         if (res.activities && res.activities.length > 0) {
           this.activities.update(current => [...current, ...(res.activities || [])]);
         }
-        if (res.nextPageToken) {
-          this.nextPageToken.set(res.nextPageToken);
+
+        const newToken = res.nextPageToken;
+        if (newToken && newToken !== this.lastPageToken) {
+          this.lastPageToken = newToken;
+          this.nextPageToken.set(newToken);
+          // Recursive call to get next page immediately
+          this.pollCycle(id);
+        } else {
+          // No more pages for this cycle
+          this.lastPageToken = newToken;
         }
       },
       error: (err) => console.error(err)
