@@ -86,7 +86,16 @@
                 </div>
                 <div *ngIf="artifact.changeSet" class="changeset-artifact">
                   <div class="artifact-header">Suggested Changes</div>
-                  <pre class="diff-code"><code>{{ artifact.changeSet.gitPatch.unidiffPatch }}</code></pre>
+                  <div class="diff-accordion">
+                    <details *ngFor="let file of parseDiff(artifact.changeSet.gitPatch.unidiffPatch)" class="file-diff">
+                      <summary>Changes in /{{ file.fileName }}</summary>
+                      <div class="diff-content">
+                        <div *ngFor="let line of file.lines" class="diff-line" [class]="line.type">
+                          <span class="line-text">{{ line.text }}</span>
+                        </div>
+                      </div>
+                    </details>
+                  </div>
                 </div>
                 <div *ngIf="artifact.media" class="media-artifact">
                   <div class="artifact-header">Media: {{ artifact.media.mimeType }}</div>

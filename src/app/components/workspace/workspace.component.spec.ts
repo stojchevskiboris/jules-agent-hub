@@ -28,6 +28,34 @@ vi.mock('@angular/router', () => ({
 describe('WorkspaceComponent (unit tests)', () => {
   const component = new WorkspaceComponent();
 
+  describe('parseDiff', () => {
+    it('should parse a single file diff', () => {
+      const patch = 'diff --git a/src/app.ts b/src/app.ts\nindex 123..456 100644\n--- a/src/app.ts\n+++ b/src/app.ts\n@@ -1,1 +1,1 @@\n-old line\n+new line\n context line';
+      const result = component.parseDiff(patch);
+      expect(result).toHaveLength(1);
+      expect(result[0].fileName).toBe('src/app.ts');
+      expect(result[0].lines).toEqual([
+        { text: 'old line', type: 'deletion' },
+        { text: 'new line', type: 'addition' },
+        { text: ' context line', type: 'context' }
+      ]);
+    });
+
+    it('should parse multiple file diffs', () => {
+      const patch = 'diff --git a/file1.ts b/file1.ts\n+added\ndiff --git a/file2.ts b/file2.ts\n-removed';
+      const result = component.parseDiff(patch);
+      expect(result).toHaveLength(2);
+      expect(result[0].fileName).toBe('file1.ts');
+      expect(result[1].fileName).toBe('file2.ts');
+    });
+
+    it('should handle missing filenames gracefully', () => {
+      const patch = 'diff --git random garbage\n+line';
+      const result = component.parseDiff(patch);
+      expect(result[0].fileName).toBe('unknown file');
+    });
+  });
+
   describe('getActivityMessage', () => {
     it('should return user message', () => {
       const activity = { userMessaged: { userMessage: 'Hello Jules' } } as Activity;

@@ -184,4 +184,37 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return title.substring(0, maxLength) + '...';
   }
 
+  parseDiff(patch: string): { fileName: string; lines: { text: string; type: string }[] }[] {
+    const files: { fileName: string; lines: { text: string; type: string }[] }[] = [];
+    const lines = patch.split('\n');
+    let currentFile: { fileName: string; lines: { text: string; type: string }[] } | null = null;
+
+    for (const line of lines) {
+      if (line.startsWith('diff --git')) {
+        // Extract filename from "diff --git a/path/to/file b/path/to/file"
+        const match = line.match(/b\/(.*)$/);
+        const fileName = match ? match[1] : 'unknown file';
+        currentFile = { fileName, lines: [] };
+        files.push(currentFile);
+      } else if (currentFile) {
+        if (line.startsWith('---') || line.startsWith('+++') || line.startsWith('@@') || line.startsWith('index ')) {
+          continue; // Skip technical metadata
+        }
+
+        let type = 'context';
+        if (line.startsWith('+')) type = 'addition';
+        else if (line.startsWith('-')) type = 'deletion';
+
+        // Remove the +/- prefix for cleaner display if it's an addition or deletion
+        const text = (type === 'addition' || type === 'deletion') ? line.substring(1) : line;
+
+        // Don't add empty lines at the end of a file's diff
+        if (text.trim() === '' && line === '') continue;
+
+        currentFile.lines.push({ text, type });
+      }
+    }
+    return files;
+  }
+
 }

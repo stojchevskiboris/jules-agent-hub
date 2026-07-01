@@ -273,6 +273,69 @@
             code { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
           }
 
+          .diff-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+
+            .file-diff {
+              background: #0d1117;
+              border: 1px solid #30363d;
+              border-radius: 6px;
+              overflow: hidden;
+
+              summary {
+                padding: 0.5rem 0.75rem;
+                cursor: pointer;
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #c9d1d9;
+                background: #161b22;
+                &:hover { background: #1c2128; }
+                list-style: none;
+                &::-webkit-details-marker { display: none; }
+                &:before {
+                  content: '▸';
+                  display: inline-block;
+                  width: 1rem;
+                  transition: transform 0.2s;
+                }
+              }
+
+              &[open] summary:before {
+                transform: rotate(90deg);
+              }
+
+              .diff-content {
+                padding: 0.5rem 0;
+                font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+                font-size: 0.8rem;
+                background: #0d1117;
+
+                .diff-line {
+                  padding: 0 0.75rem;
+                  white-space: pre-wrap;
+                  word-break: break-all;
+
+                  &.addition {
+                    background-color: rgba(46, 160, 67, 0.15);
+                    color: #7ee787;
+                    &:before { content: '+ '; opacity: 0.5; }
+                  }
+                  &.deletion {
+                    background-color: rgba(248, 81, 73, 0.15);
+                    color: #ffa198;
+                    &:before { content: '- '; opacity: 0.5; }
+                  }
+                  &.context {
+                    color: #8b949e;
+                    &:before { content: '  '; }
+                  }
+                }
+              }
+            }
+          }
+
           .media-preview {
             img {
               max-width: 100%;
