@@ -39,12 +39,22 @@ describe('WorkspaceComponent (unit tests)', () => {
       expect(component.getActivityMessage(activity)).toBe('Hello User');
     });
 
-    it('should return plan generated message', () => {
+    it('should return plan generated message with description', () => {
+      const activity = { planGenerated: {}, description: 'Detailed plan' } as Activity;
+      expect(component.getActivityMessage(activity)).toBe('Detailed plan');
+    });
+
+    it('should return default plan generated message', () => {
       const activity = { planGenerated: {} } as Activity;
       expect(component.getActivityMessage(activity)).toBe('Generated a new plan.');
     });
 
-    it('should return plan approved message', () => {
+    it('should return plan approved message with description', () => {
+      const activity = { planApproved: {}, description: 'Approved by me' } as Activity;
+      expect(component.getActivityMessage(activity)).toBe('Approved by me');
+    });
+
+    it('should return default plan approved message', () => {
       const activity = { planApproved: {} } as Activity;
       expect(component.getActivityMessage(activity)).toBe('Plan approved.');
     });
@@ -98,7 +108,31 @@ describe('WorkspaceComponent (unit tests)', () => {
       expect(component.getActivityMessage(activity)).toBe('Ran command: npm test');
     });
 
-    it('should return session completed message', () => {
+    it('should handle artifacts: media', () => {
+      const activity = {
+        artifacts: [{
+          media: { mimeType: 'image/png' }
+        }]
+      } as any;
+      expect(component.getActivityMessage(activity)).toBe('Generated media: image/png');
+    });
+
+    it('should handle multiple artifacts', () => {
+      const activity = {
+        artifacts: [
+          { bashOutput: { command: 'ls' } },
+          { media: { mimeType: 'text/plain' } }
+        ]
+      } as any;
+      expect(component.getActivityMessage(activity)).toBe('Ran command: ls\nGenerated media: text/plain');
+    });
+
+    it('should return session completed message with description', () => {
+      const activity = { sessionCompleted: {}, description: 'All done!' } as Activity;
+      expect(component.getActivityMessage(activity)).toBe('All done!');
+    });
+
+    it('should return default session completed message', () => {
       const activity = { sessionCompleted: {} } as Activity;
       expect(component.getActivityMessage(activity)).toBe('Session completed successfully.');
     });

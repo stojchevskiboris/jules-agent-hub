@@ -222,6 +222,65 @@
         line-height: 1.5;
         white-space: pre-wrap;
         word-break: break-word;
+
+        .message-content {
+          margin-bottom: 0.75rem;
+        }
+
+        .plan-details {
+          background: #0d1117;
+          border: 1px solid #30363d;
+          border-radius: 6px;
+          padding: 0.75rem;
+          margin-top: 0.5rem;
+
+          .plan-steps {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+
+            li {
+              margin-bottom: 1rem;
+              &:last-child { margin-bottom: 0; }
+              strong { color: #58a6ff; display: block; margin-bottom: 0.25rem; }
+              p { margin: 0; font-size: 0.85rem; color: #8b949e; }
+            }
+          }
+        }
+
+        .artifacts-container {
+          margin-top: 0.75rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+
+          .artifact-header {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #8b949e;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+          }
+
+          pre {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 0;
+            code { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; }
+          }
+
+          .media-preview {
+            img {
+              max-width: 100%;
+              border-radius: 6px;
+              border: 1px solid #30363d;
+            }
+          }
+        }
       }
 
       &.user-msg {

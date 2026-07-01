@@ -120,32 +120,43 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   getActivityMessage(activity: Activity): string {
     if (activity.userMessaged) return activity.userMessaged.userMessage;
     if (activity.agentMessaged) return activity.agentMessaged.agentMessage;
-    if (activity.planGenerated) return 'Generated a new plan.';
-    if (activity.planApproved) return 'Plan approved.';
+
+    if (activity.planGenerated) {
+      return activity.description || 'Generated a new plan.';
+    }
+
+    if (activity.planApproved) {
+      return activity.description || 'Plan approved.';
+    }
 
     if (activity.progressUpdated) {
       const title = activity.progressUpdated.title;
       const desc = activity.progressUpdated.description;
       if (title && desc) return `${title}: ${desc}`;
-      if (title) return title;
-      if (desc) return desc;
-      return activity.description || '';
+      return title || desc || activity.description || '';
     }
 
     if (activity.artifacts && activity.artifacts.length > 0) {
-      const artifact = activity.artifacts[0];
-      if (artifact.changeSet) {
-        return `Code changes: ${artifact.changeSet.gitPatch.suggestedCommitMessage}`;
+      const messages: string[] = [];
+      for (const artifact of activity.artifacts) {
+        if (artifact.changeSet) {
+          messages.push(`Code changes: ${artifact.changeSet.gitPatch.suggestedCommitMessage}`);
+        } else if (artifact.bashOutput) {
+          messages.push(`Ran command: ${artifact.bashOutput.command}`);
+        } else if (artifact.media) {
+          messages.push(`Generated media: ${artifact.media.mimeType}`);
+        }
       }
-      if (artifact.bashOutput) {
-        return `Ran command: ${artifact.bashOutput.command}`;
-      }
+      if (messages.length > 0) return messages.join('\n');
     }
 
     if (activity.sessionCompleted !== undefined && activity.sessionCompleted !== null) {
-      return 'Session completed successfully.';
+      return activity.description || 'Session completed successfully.';
     }
-    if (activity.sessionFailed) return `Session failed: ${activity.sessionFailed.reason}`;
+
+    if (activity.sessionFailed) {
+      return `Session failed: ${activity.sessionFailed.reason}`;
+    }
 
     return activity.description || '';
   }
