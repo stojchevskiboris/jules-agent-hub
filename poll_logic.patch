@@ -1,0 +1,37 @@
+<<<<<<< SEARCH
+        const newToken = res.nextPageToken;
+        if (newToken && newToken !== this.lastPageToken) {
+          this.lastPageToken = newToken;
+          this.nextPageToken.set(newToken);
+          // Recursive call to get next page immediately
+          this.pollCycle(id);
+        } else {
+          // Stop polling if token is same or missing (per user request)
+          this.stopPolling();
+          this.lastPageToken = newToken;
+        }
+
+        // Final refresh and stop if terminal activity found
+        if (res.activities && res.activities.some(a => a.sessionCompleted || a.sessionFailed)) {
+          this.stopPolling();
+          this.fetchSession(id);
+        }
+=======
+        const newToken = res.nextPageToken;
+        if (newToken && newToken !== this.lastPageToken) {
+          this.lastPageToken = newToken;
+          this.nextPageToken.set(newToken);
+          // Recursive call to get next page immediately
+          this.pollCycle(id);
+        } else {
+          this.lastPageToken = newToken;
+        }
+
+        // Keep session state updated
+        this.fetchSession(id);
+
+        // Final stop if terminal activity found
+        if (res.activities && res.activities.some(a => a.sessionCompleted || a.sessionFailed)) {
+          this.stopPolling();
+        }
+>>>>>>> REPLACE

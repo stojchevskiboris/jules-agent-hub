@@ -26,7 +26,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   lastPageToken: string | undefined = undefined;
 
   newPrompt = signal<string>('');
-  automationMode = signal<AutomationMode>(AutomationMode.AUTOMATION_MODE_UNSPECIFIED);
+  automationMode = signal<AutomationMode>(AutomationMode.AUTO_CREATE_PR);
   chatMessage = signal<string>('');
 
   loading = signal<boolean>(false);
@@ -119,15 +119,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           // Recursive call to get next page immediately
           this.pollCycle(id);
         } else {
-          // Stop polling if token is same or missing (per user request)
-          this.stopPolling();
           this.lastPageToken = newToken;
         }
 
-        // Final refresh and stop if terminal activity found
+        // Keep session state updated
+        this.fetchSession(id);
+
+        // Final stop if terminal activity found
         if (res.activities && res.activities.some(a => a.sessionCompleted || a.sessionFailed)) {
           this.stopPolling();
-          this.fetchSession(id);
         }
       },
       error: (err) => console.error(err)
@@ -232,6 +232,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       next: () => this.fetchSession(id),
       error: (err) => console.error(err)
     });
+  }
+
+  getPullRequestUrl(): string | undefined {
+    return this.session()?.outputs?.find(o => o.pullRequest)?.pullRequest?.url;
   }
 
   isAwaitingApproval() {
