@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { Subscription, interval, startWith } from 'rxjs';
 import { JulesApiService } from '../../services/jules-api.service';
 import { Session, Activity, AutomationMode, SessionState } from '../../models/jules.models';
@@ -16,6 +16,7 @@ import { Session, Activity, AutomationMode, SessionState } from '../../models/ju
 export class WorkspaceComponent implements OnInit, OnDestroy {
   private readonly apiService = inject(JulesApiService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   selectedSource = signal<string | null>(null);
   defaultBranch = signal<string | null>(null);
@@ -76,9 +77,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.apiService.createSession(source, prompt, this.automationMode(), this.defaultBranch() || undefined).subscribe({
       next: (session) => {
-        this.activeSessionId.set(session.name);
         this.newPrompt.set('');
         this.loading.set(false);
+        this.router.navigate(['/workspace'], { queryParams: { sessionId: session.name } });
       },
       error: (err) => {
         this.loading.set(false);

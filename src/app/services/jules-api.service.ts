@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, interval, switchMap, startWith } from 'rxjs';
+import { Observable, interval, switchMap, startWith, Subject, tap } from 'rxjs';
 import {
   Source, ListSourcesResponse,
   Session, ListSessionsResponse,
@@ -14,6 +14,9 @@ import {
 export class JulesApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = 'https://jules.googleapis.com/v1alpha';
+
+  private readonly sessionCreatedSubject = new Subject<Session>();
+  readonly sessionCreated$ = this.sessionCreatedSubject.asObservable();
 
   getSources(pageToken?: string): Observable<ListSourcesResponse> {
     const url = pageToken ? `${this.baseUrl}/sources?pageToken=${pageToken}` : `${this.baseUrl}/sources`;
@@ -37,7 +40,9 @@ export class JulesApiService {
       body.sourceContext.githubRepoContext = { startingBranch };
     }
 
-    return this.http.post<Session>(`${this.baseUrl}/sessions`, body);
+    return this.http.post<Session>(`${this.baseUrl}/sessions`, body).pipe(
+      tap(session => this.sessionCreatedSubject.next(session))
+    );
   }
 
   getSession(sessionId: string): Observable<Session> {

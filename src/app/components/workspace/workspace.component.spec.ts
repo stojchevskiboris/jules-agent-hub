@@ -20,6 +20,7 @@ vi.mock('@angular/core', async () => {
 
 vi.mock('@angular/router', () => ({
   ActivatedRoute: vi.fn(),
+  Router: vi.fn(),
   RouterModule: {
     forRoot: vi.fn()
   }

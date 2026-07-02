@@ -34,7 +34,8 @@
     <div class="sessions-section">
       <h3>Recent Sessions</h3>
       <ul class="sessions-list">
-        <li *ngFor="let session of sessions().slice(0, 5)" (click)="selectSession(session)" class="session-item">
+        <li *ngFor="let session of sessions().slice(0, 5)" (click)="selectSession(session)" class="session-item"
+            [class.active]="currentSessionId() === session.name">
           <span class="session-name">{{ truncateTitle(session.title || getShortName(session.name), 30) }}</span>
         </li>
       </ul>
@@ -45,7 +46,8 @@
       <div *ngIf="loading()" class="loader">Loading...</div>
       <div *ngIf="error() && error() !== API_KEY_ERROR" class="error">{{ error() }}</div>
       <ul class="sources-list">
-        <li *ngFor="let source of sources()" (click)="selectSource(source)" class="source-item">
+        <li *ngFor="let source of sources()" (click)="selectSource(source)" class="source-item"
+            [class.active]="activeSource() === source.name">
           <span class="source-name">{{ source.githubRepo.repo || source.name }}</span>
         </li>
       </ul>
