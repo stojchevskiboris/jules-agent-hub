@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { RouterModule, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { JulesApiService } from '../../services/jules-api.service';
 import { Source, Session } from '../../models/jules.models';
@@ -15,9 +16,10 @@ const API_KEY_ERROR_MESSAGE = 'Jules API key is needed';
   templateUrl: './dashboard-layout.component.html',
   styleUrl: './dashboard-layout.component.scss'
 })
-export class DashboardLayoutComponent implements OnInit {
+export class DashboardLayoutComponent implements OnInit, OnDestroy {
   private readonly apiService = inject(JulesApiService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   sources = signal<Source[]>([]);
   sessions = signal<Session[]>([]);
@@ -25,6 +27,24 @@ export class DashboardLayoutComponent implements OnInit {
   error = signal<string | null>(null);
   sidebarOpen = signal<boolean>(false);
   apiKeyValid = signal<boolean>(false);
+
+  currentSessionId = signal<string | null>(null);
+  currentSource = signal<string | null>(null);
+
+  activeSource = computed(() => {
+    const directSource = this.currentSource();
+    if (directSource) return directSource;
+
+    const sessionId = this.currentSessionId();
+    if (sessionId) {
+      const session = this.sessions().find(s => s.name === sessionId);
+      return session?.sourceContext.source || null;
+    }
+
+    return null;
+  });
+
+  private subs = new Subscription();
 
   // Expose constant to template
   protected readonly API_KEY_ERROR = API_KEY_ERROR_MESSAGE;
@@ -34,12 +54,33 @@ export class DashboardLayoutComponent implements OnInit {
     this.loadSources();
     this.loadSessions();
 
+    // Refresh sessions when a new one is created
+    this.subs.add(
+      this.apiService.sessionCreated$.subscribe(() => {
+        this.loadSessions();
+      })
+    );
+
+    // Track query params for active state
+    this.subs.add(
+      this.route.queryParams.subscribe(params => {
+        this.currentSessionId.set(params['sessionId'] || null);
+        this.currentSource.set(params['source'] || null);
+      })
+    );
+
     // Close sidebar on route change
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      this.sidebarOpen.set(false);
-    });
+    this.subs.add(
+      this.router.events.pipe(
+        filter(event => event instanceof NavigationEnd)
+      ).subscribe(() => {
+        this.sidebarOpen.set(false);
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
   }
 
   private checkApiKey() {

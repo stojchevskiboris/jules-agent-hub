@@ -187,10 +187,16 @@
         border-radius: 6px;
         cursor: pointer;
         font-size: 0.9rem;
-        transition: background 0.2s;
+        transition: background 0.2s, color 0.2s;
 
         &:hover {
           background-color: #21262d;
+        }
+
+        &.active {
+          background-color: #1f6feb22;
+          color: #58a6ff;
+          font-weight: 500;
         }
 
         span {
