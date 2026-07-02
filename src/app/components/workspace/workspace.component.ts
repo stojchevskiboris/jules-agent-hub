@@ -29,6 +29,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   newPrompt = signal<string>('');
   automationMode = signal<AutomationMode>(AutomationMode.AUTO_CREATE_PR);
   chatMessage = signal<string>('');
+  isSendingMessage = signal<boolean>(false);
 
   loading = signal<boolean>(false);
   pollingSub?: Subscription;
@@ -142,11 +143,13 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   sendChatMessage(textareaElement?: HTMLTextAreaElement) {
     const id = this.activeSessionId();
     const msg = this.chatMessage();
-    if (!id || !msg) return;
+    if (!id || !msg || this.isSendingMessage()) return;
 
+    this.isSendingMessage.set(true);
     this.apiService.sendMessage(id, msg).subscribe({
       next: () => {
         this.chatMessage.set('');
+        this.isSendingMessage.set(false);
         // Optimization: immediately poll or wait for next interval
 
         // Reset textarea height after sending
@@ -161,7 +164,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
           }
         }, 0);
       },
-      error: (err) => console.error(err)
+      error: (err) => {
+        this.isSendingMessage.set(false);
+        console.error(err);
+      }
     });
   }
 
