@@ -168,13 +168,55 @@
   }
 
   .sessions-section, .sources-section {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
 
     h3 {
       font-size: 0.85rem;
       text-transform: uppercase;
       color: #8b949e;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 6px;
+      transition: background-color 0.2s, color 0.2s;
+
+      &:hover {
+        background-color: #21262d;
+        color: #f0f6fc;
+      }
+
+      .arrow {
+        font-size: 0.7rem;
+        color: #484f58;
+      }
+    }
+
+    .section-content {
+      max-height: 90dvh;
+      overflow-y: auto;
+      padding-right: 4px;
+
+      &::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #30363d;
+        border-radius: 10px;
+      }
+
+      &::-webkit-scrollbar-thumb:hover {
+        background: #484f58;
+      }
     }
 
     ul {

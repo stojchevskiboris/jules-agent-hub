@@ -54,13 +54,31 @@ describe('DashboardLayoutComponent (unit tests)', () => {
     vi.clearAllMocks();
     component = new DashboardLayoutComponent();
     mockApiService = (component as any).apiService;
-    // Set up a default return value for getSessions to avoid "Cannot read properties of undefined (reading 'subscribe')"
     mockApiService.getSessions.mockReturnValue(of({ sessions: [] }));
   });
 
   it('should initialize sessions and nextPageToken', () => {
     expect(component.sessions()).toEqual([]);
     expect(component.sessionNextPageToken()).toBeNull();
+  });
+
+  it('should initialize accordions as expanded', () => {
+    expect(component.sessionsExpanded()).toBe(true);
+    expect(component.sourcesExpanded()).toBe(true);
+  });
+
+  it('should toggle sessions accordion', () => {
+    component.toggleSessions();
+    expect(component.sessionsExpanded()).toBe(false);
+    component.toggleSessions();
+    expect(component.sessionsExpanded()).toBe(true);
+  });
+
+  it('should toggle sources accordion', () => {
+    component.toggleSources();
+    expect(component.sourcesExpanded()).toBe(false);
+    component.toggleSources();
+    expect(component.sourcesExpanded()).toBe(true);
   });
 
   describe('loadSessions', () => {
@@ -124,7 +142,6 @@ describe('DashboardLayoutComponent (unit tests)', () => {
 
       component.loadSessions('token1');
 
-      // Since of() is synchronous, it will be false again immediately
       expect(component.loadingMoreSessions()).toBe(false);
     });
   });

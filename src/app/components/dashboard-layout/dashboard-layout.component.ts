@@ -29,6 +29,8 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   sidebarOpen = signal<boolean>(false);
   apiKeyValid = signal<boolean>(false);
+  sessionsExpanded = signal<boolean>(true);
+  sourcesExpanded = signal<boolean>(true);
 
   currentSessionId = signal<string | null>(null);
   currentSource = signal<string | null>(null);
@@ -160,6 +162,14 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     if (token) {
       this.loadSessions(token);
     }
+  }
+
+  toggleSessions() {
+    this.sessionsExpanded.update(v => !v);
+  }
+
+  toggleSources() {
+    this.sourcesExpanded.update(v => !v);
   }
 
   toggleSidebar() {

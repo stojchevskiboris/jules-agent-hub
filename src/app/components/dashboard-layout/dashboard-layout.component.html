@@ -31,31 +31,41 @@
       </a>
     </nav>
 
-    <div class="sessions-section">
-      <h3>Recent Sessions</h3>
-      <ul class="sessions-list">
-        <li *ngFor="let session of sessions()" (click)="selectSession(session)" class="session-item"
-            [class.active]="currentSessionId() === session.name">
-          <span class="session-name">{{ truncateTitle(session.title || getShortName(session.name), 30) }}</span>
-        </li>
-      </ul>
-      <div *ngIf="sessionNextPageToken()" class="load-more-container">
-        <button (click)="loadMoreSessions()" class="load-more-btn" [disabled]="loadingMoreSessions()">
-          {{ loadingMoreSessions() ? 'Loading...' : 'Load More' }}
-        </button>
+    <div class="sessions-section" [class.expanded]="sessionsExpanded()">
+      <h3 (click)="toggleSessions()">
+        Recent Sessions
+        <span class="arrow">{{ sessionsExpanded() ? '▼' : '▶' }}</span>
+      </h3>
+      <div class="section-content" *ngIf="sessionsExpanded()">
+        <ul class="sessions-list">
+          <li *ngFor="let session of sessions()" (click)="selectSession(session)" class="session-item"
+              [class.active]="currentSessionId() === session.name">
+            <span class="session-name">{{ truncateTitle(session.title || getShortName(session.name), 30) }}</span>
+          </li>
+        </ul>
+        <div *ngIf="sessionNextPageToken()" class="load-more-container">
+          <button (click)="loadMoreSessions()" class="load-more-btn" [disabled]="loadingMoreSessions()">
+            {{ loadingMoreSessions() ? 'Loading...' : 'Load More' }}
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="sources-section">
-      <h3>Repositories</h3>
-      <div *ngIf="loading()" class="loader">Loading...</div>
-      <div *ngIf="error() && error() !== API_KEY_ERROR" class="error">{{ error() }}</div>
-      <ul class="sources-list">
-        <li *ngFor="let source of sources()" (click)="selectSource(source)" class="source-item"
-            [class.active]="activeSource() === source.name">
-          <span class="source-name">{{ source.githubRepo.repo || source.name }}</span>
-        </li>
-      </ul>
+    <div class="sources-section" [class.expanded]="sourcesExpanded()">
+      <h3 (click)="toggleSources()">
+        Repositories
+        <span class="arrow">{{ sourcesExpanded() ? '▼' : '▶' }}</span>
+      </h3>
+      <div class="section-content" *ngIf="sourcesExpanded()">
+        <div *ngIf="loading()" class="loader">Loading...</div>
+        <div *ngIf="error() && error() !== API_KEY_ERROR" class="error">{{ error() }}</div>
+        <ul class="sources-list">
+          <li *ngFor="let source of sources()" (click)="selectSource(source)" class="source-item"
+              [class.active]="activeSource() === source.name">
+            <span class="source-name">{{ source.githubRepo.repo || source.name }}</span>
+          </li>
+        </ul>
+      </div>
     </div>
   </aside>
 
