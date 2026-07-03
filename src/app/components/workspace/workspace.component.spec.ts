@@ -194,6 +194,15 @@ describe('WorkspaceComponent (unit tests)', () => {
       expect(component.getActivityMessage(activity)).toBe('Generated media: image/png');
     });
 
+    it('should handle artifacts: video media', () => {
+      const activity = {
+        artifacts: [{
+          media: { mimeType: 'video/webm' }
+        }]
+      } as any;
+      expect(component.getActivityMessage(activity)).toBe('Generated media: video/webm');
+    });
+
     it('should handle multiple artifacts', () => {
       const activity = {
         artifacts: [
