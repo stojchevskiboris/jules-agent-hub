@@ -23,8 +23,9 @@ export class JulesApiService {
     return this.http.get<ListSourcesResponse>(url);
   }
 
-  getSessions(): Observable<ListSessionsResponse> {
-    return this.http.get<ListSessionsResponse>(`${this.baseUrl}/sessions`);
+  getSessions(pageToken?: string): Observable<ListSessionsResponse> {
+    const url = pageToken ? `${this.baseUrl}/sessions?pageToken=${pageToken}` : `${this.baseUrl}/sessions`;
+    return this.http.get<ListSessionsResponse>(url);
   }
 
   createSession(sourceName: string, prompt: string, automationMode: string = 'AUTOMATION_MODE_UNSPECIFIED', startingBranch?: string): Observable<Session> {

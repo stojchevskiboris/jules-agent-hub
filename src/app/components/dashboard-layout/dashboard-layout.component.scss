@@ -207,6 +207,35 @@
         }
       }
     }
+
+    .load-more-container {
+      margin-top: 0.5rem;
+      display: flex;
+      justify-content: center;
+
+      .load-more-btn {
+        background: none;
+        border: 1px solid #30363d;
+        color: #8b949e;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        width: 100%;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
+
+        &:hover:not(:disabled) {
+          border-color: #8b949e;
+          color: #c9d1d9;
+          background-color: #21262d;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
   }
 }
 

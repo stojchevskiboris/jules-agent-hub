@@ -34,11 +34,16 @@
     <div class="sessions-section">
       <h3>Recent Sessions</h3>
       <ul class="sessions-list">
-        <li *ngFor="let session of sessions().slice(0, 5)" (click)="selectSession(session)" class="session-item"
+        <li *ngFor="let session of sessions()" (click)="selectSession(session)" class="session-item"
             [class.active]="currentSessionId() === session.name">
           <span class="session-name">{{ truncateTitle(session.title || getShortName(session.name), 30) }}</span>
         </li>
       </ul>
+      <div *ngIf="sessionNextPageToken()" class="load-more-container">
+        <button (click)="loadMoreSessions()" class="load-more-btn" [disabled]="loadingMoreSessions()">
+          {{ loadingMoreSessions() ? 'Loading...' : 'Load More' }}
+        </button>
+      </div>
     </div>
 
     <div class="sources-section">
