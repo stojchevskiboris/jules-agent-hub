@@ -101,7 +101,10 @@
                 <div *ngIf="artifact.media" class="media-artifact">
                   <div class="artifact-header">Media: {{ artifact.media.mimeType }}</div>
                   <div *ngIf="artifact.media.mimeType.startsWith('image/')" class="media-preview">
-                    <img [src]="'data:' + artifact.media.mimeType + ';base64,' + artifact.media.data" alt="Artifact media">
+                    <img [src]="getSafeUrl(artifact.media.mimeType, artifact.media.data)" alt="Artifact media">
+                  </div>
+                  <div *ngIf="artifact.media.mimeType.startsWith('video/')" class="media-preview">
+                    <video controls [src]="getSafeUrl(artifact.media.mimeType, artifact.media.data)"></video>
                   </div>
                 </div>
               </div>

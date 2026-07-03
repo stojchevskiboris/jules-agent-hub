@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { Subscription, interval, startWith } from 'rxjs';
 import { JulesApiService } from '../../services/jules-api.service';
@@ -17,6 +18,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   private readonly apiService = inject(JulesApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly sanitizer = inject(DomSanitizer);
 
   selectedSource = signal<string | null>(null);
   defaultBranch = signal<string | null>(null);
@@ -284,6 +286,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (!title) return 'No title';
     if (title.length <= maxLength) return title;
     return title.substring(0, maxLength) + '...';
+  }
+
+  getSafeUrl(mimeType: string, data: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`data:${mimeType};base64,${data}`);
   }
 
   trackByActivityId(index: number, activity: Activity): string {
