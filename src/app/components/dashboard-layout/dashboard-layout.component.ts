@@ -23,10 +23,14 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
 
   sources = signal<Source[]>([]);
   sessions = signal<Session[]>([]);
+  sessionNextPageToken = signal<string | null>(null);
   loading = signal<boolean>(true);
+  loadingMoreSessions = signal<boolean>(false);
   error = signal<string | null>(null);
   sidebarOpen = signal<boolean>(false);
   apiKeyValid = signal<boolean>(false);
+  sessionsExpanded = signal<boolean>(true);
+  sourcesExpanded = signal<boolean>(true);
 
   currentSessionId = signal<string | null>(null);
   currentSource = signal<string | null>(null);
@@ -124,22 +128,48 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadSessions() {
-    this.apiService.getSessions().subscribe({
+  loadSessions(pageToken?: string) {
+    if (pageToken) {
+      this.loadingMoreSessions.set(true);
+    }
+    this.apiService.getSessions(pageToken).subscribe({
       next: (res) => {
-        const sessions = res.sessions || [];
+        let currentSessions = res.sessions || [];
+        if (pageToken) {
+          currentSessions = [...this.sessions(), ...currentSessions];
+        }
+
         // Sort sessions by createTime descending to show the most recent first
-        sessions.sort((a, b) => {
+        currentSessions.sort((a, b) => {
           const timeA = a.createTime ? new Date(a.createTime).getTime() : 0;
           const timeB = b.createTime ? new Date(b.createTime).getTime() : 0;
           return timeB - timeA;
         });
-        this.sessions.set(sessions);
+
+        this.sessions.set(currentSessions);
+        this.sessionNextPageToken.set(res.nextPageToken || null);
+        this.loadingMoreSessions.set(false);
       },
       error: (err) => {
         console.error('Failed to load sessions', err);
+        this.loadingMoreSessions.set(false);
       }
     });
+  }
+
+  loadMoreSessions() {
+    const token = this.sessionNextPageToken();
+    if (token) {
+      this.loadSessions(token);
+    }
+  }
+
+  toggleSessions() {
+    this.sessionsExpanded.update(v => !v);
+  }
+
+  toggleSources() {
+    this.sourcesExpanded.update(v => !v);
   }
 
   toggleSidebar() {
