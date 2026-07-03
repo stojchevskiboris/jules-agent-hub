@@ -90,7 +90,34 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   }
 
   fetchSession(id: string) {
-    this.apiService.getSession(id).subscribe(s => this.session.set(s));
+    this.apiService.getSession(id).subscribe(s => {
+      this.session.set(s);
+      this.addInitialPromptActivity(s);
+    });
+  }
+
+  private addInitialPromptActivity(session: Session) {
+    if (!session.prompt) return;
+
+    const initialId = `initial-prompt-${session.id}`;
+    this.activities.update(current => {
+      if (current.some(a => a.id === initialId)) {
+        return current;
+      }
+
+      const initialActivity: Activity = {
+        id: initialId,
+        name: `activities/${initialId}`,
+        originator: 'user',
+        description: session.prompt,
+        createTime: session.createTime || new Date().toISOString(),
+        userMessaged: {
+          userMessage: session.prompt
+        }
+      };
+
+      return [initialActivity, ...current];
+    });
   }
 
   startPolling(id: string) {
