@@ -1,7 +1,8 @@
 import '@angular/compiler';
 import { WorkspaceComponent } from './workspace.component';
-import { Activity } from '../../models/jules.models';
+import { Activity, Session } from '../../models/jules.models';
 import { describe, it, expect, vi } from 'vitest';
+import { of } from 'rxjs';
 
 // Mock Angular's inject and signal
 vi.mock('@angular/core', async () => {
@@ -62,6 +63,45 @@ describe('WorkspaceComponent (unit tests)', () => {
   describe('chat sending state', () => {
     it('should initialize isSendingMessage as false', () => {
       expect(component.isSendingMessage()).toBe(false);
+    });
+  });
+
+  describe('initial prompt activity', () => {
+    it('should prepend initial prompt activity when fetchSession is called', () => {
+      const mockSession: Session = {
+        id: '123',
+        name: 'sessions/123',
+        prompt: 'Initial prompt',
+        sourceContext: { source: 'repo' }
+      };
+
+      // Mock apiService.getSession
+      (component as any).apiService.getSession = vi.fn().mockReturnValue(of(mockSession));
+
+      component.fetchSession('123');
+
+      const activities = component.activities();
+      expect(activities).toHaveLength(1);
+      expect(activities[0].id).toBe('initial-prompt-123');
+      expect(activities[0].userMessaged?.userMessage).toBe('Initial prompt');
+      expect(activities[0].originator).toBe('user');
+    });
+
+    it('should not prepend duplicate initial prompt activity', () => {
+      const mockSession: Session = {
+        id: '123',
+        name: 'sessions/123',
+        prompt: 'Initial prompt',
+        sourceContext: { source: 'repo' }
+      };
+
+      (component as any).apiService.getSession = vi.fn().mockReturnValue(of(mockSession));
+
+      component.fetchSession('123');
+      component.fetchSession('123');
+
+      const activities = component.activities();
+      expect(activities).toHaveLength(1);
     });
   });
 
