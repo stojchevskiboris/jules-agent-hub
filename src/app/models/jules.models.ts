@@ -49,7 +49,7 @@ export interface ListSourcesResponse {
 
 export interface PlanStep {
   id: string;
-  index: number;
+  index?: number;
   title: string;
   description: string;
 }
