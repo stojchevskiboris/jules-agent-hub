@@ -9,9 +9,11 @@ vi.mock('@angular/core', async () => {
   return {
     ...actual,
     inject: vi.fn(() => ({})),
-    signal: vi.fn((val) => {
-      const s = () => val;
-      s.set = vi.fn();
+    signal: vi.fn((initialValue) => {
+      let value = initialValue;
+      const s = vi.fn(() => value);
+      (s as any).set = vi.fn((newValue) => { value = newValue; });
+      (s as any).update = vi.fn((updateFn) => { value = updateFn(value); });
       return s;
     }),
     effect: vi.fn()
@@ -54,6 +56,12 @@ describe('WorkspaceComponent (unit tests)', () => {
       const patch = 'diff --git random garbage\n+line';
       const result = component.parseDiff(patch);
       expect(result[0].fileName).toBe('unknown file');
+    });
+  });
+
+  describe('chat sending state', () => {
+    it('should initialize isSendingMessage as false', () => {
+      expect(component.isSendingMessage()).toBe(false);
     });
   });
 

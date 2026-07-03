@@ -127,8 +127,9 @@
             (input)="adjustHeight(chatInput)"
             placeholder="Type a message to the agent..."
             rows="1"></textarea>
-          <button class="btn-send" (click)="sendChatMessage(chatInput)" [disabled]="!chatMessage()">
-            Send
+          <button class="btn-send" (click)="sendChatMessage(chatInput)" [disabled]="!chatMessage() || isSendingMessage()">
+            <span *ngIf="isSendingMessage()" class="loader"></span>
+            {{ isSendingMessage() ? '' : 'Send' }}
           </button>
         </div>
       </footer>
