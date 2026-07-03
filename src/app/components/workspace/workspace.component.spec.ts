@@ -233,4 +233,62 @@ describe('WorkspaceComponent (unit tests)', () => {
       expect(component.getActivityMessage(activity)).toBe('Random event');
     });
   });
+
+  describe('sessionsAreEqual', () => {
+    it('should return true for identical sessions', () => {
+      const s1: Session = { name: 's1', state: 'RUNNING', title: 'T1', outputs: [], sourceContext: { source: 'r' } } as any;
+      expect((component as any).sessionsAreEqual(s1, s1)).toBe(true);
+    });
+
+    it('should return true for equal sessions', () => {
+      const s1: Session = { name: 's1', state: 'RUNNING', title: 'T1', outputs: [{ pullRequest: { url: 'u1' } }], sourceContext: { source: 'r' } } as any;
+      const s2: Session = { name: 's1', state: 'RUNNING', title: 'T1', outputs: [{ pullRequest: { url: 'u1' } }], sourceContext: { source: 'r' } } as any;
+      expect((component as any).sessionsAreEqual(s1, s2)).toBe(true);
+    });
+
+    it('should return false for different names', () => {
+      const s1: Session = { name: 's1', state: 'RUNNING', title: 'T1' } as any;
+      const s2: Session = { name: 's2', state: 'RUNNING', title: 'T1' } as any;
+      expect((component as any).sessionsAreEqual(s1, s2)).toBe(false);
+    });
+
+    it('should return false for different states', () => {
+      const s1: Session = { name: 's1', state: 'RUNNING', title: 'T1' } as any;
+      const s2: Session = { name: 's1', state: 'COMPLETED', title: 'T1' } as any;
+      expect((component as any).sessionsAreEqual(s1, s2)).toBe(false);
+    });
+
+    it('should return false for different titles', () => {
+      const s1: Session = { name: 's1', state: 'RUNNING', title: 'T1' } as any;
+      const s2: Session = { name: 's1', state: 'RUNNING', title: 'T2' } as any;
+      expect((component as any).sessionsAreEqual(s1, s2)).toBe(false);
+    });
+
+    it('should return false for different outputs', () => {
+      const s1: Session = { name: 's1', state: 'RUNNING', title: 'T1', outputs: [] } as any;
+      const s2: Session = { name: 's1', state: 'RUNNING', title: 'T1', outputs: [{ pullRequest: { url: 'u1' } }] } as any;
+      expect((component as any).sessionsAreEqual(s1, s2)).toBe(false);
+    });
+  });
+
+  describe('expandedDiffs', () => {
+    it('should track expanded diffs', () => {
+      expect(component.isDiffExpanded('a1', 'f1')).toBe(false);
+      component.toggleDiff('a1', 'f1', true);
+      expect(component.isDiffExpanded('a1', 'f1')).toBe(true);
+      component.toggleDiff('a1', 'f1', false);
+      expect(component.isDiffExpanded('a1', 'f1')).toBe(false);
+    });
+
+    it('should track multiple diffs independently', () => {
+      component.toggleDiff('a1', 'f1', true);
+      component.toggleDiff('a1', 'f2', true);
+      component.toggleDiff('a2', 'f1', true);
+
+      expect(component.isDiffExpanded('a1', 'f1')).toBe(true);
+      expect(component.isDiffExpanded('a1', 'f2')).toBe(true);
+      expect(component.isDiffExpanded('a2', 'f1')).toBe(true);
+      expect(component.isDiffExpanded('a2', 'f2')).toBe(false);
+    });
+  });
 });
