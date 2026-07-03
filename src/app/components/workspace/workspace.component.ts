@@ -26,7 +26,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   session = signal<Session | null>(null);
   activities = signal<Activity[]>([]);
   nextPageToken = signal<string | undefined>(undefined);
-  lastPageToken: string | undefined = undefined;
 
   newPrompt = signal<string>('');
   automationMode = signal<AutomationMode>(AutomationMode.AUTO_CREATE_PR);
@@ -34,6 +33,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   isSendingMessage = signal<boolean>(false);
 
   loading = signal<boolean>(false);
+  expandedDiffs = signal<Set<string>>(new Set());
   pollingSub?: Subscription;
 
   constructor() {
@@ -93,9 +93,22 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   fetchSession(id: string) {
     this.apiService.getSession(id).subscribe(s => {
-      this.session.set(s);
+      if (!this.sessionsAreEqual(this.session(), s)) {
+        this.session.set(s);
+      }
       this.addInitialPromptActivity(s);
     });
+  }
+
+  private sessionsAreEqual(s1: Session | null, s2: Session | null): boolean {
+    if (s1 === s2) return true;
+    if (!s1 || !s2) return false;
+
+    // Compare meaningful properties to determine if a refresh is needed
+    return s1.name === s2.name &&
+      s1.state === s2.state &&
+      s1.title === s2.title &&
+      JSON.stringify(s1.outputs) === JSON.stringify(s2.outputs);
   }
 
   private addInitialPromptActivity(session: Session) {
@@ -135,22 +148,19 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   private pollCycle(id: string) {
     this.apiService.getSessionActivities(id, this.nextPageToken()).subscribe({
       next: (res) => {
-        if (res.activities && res.activities.length > 0) {
-          this.activities.update(current => {
-            const existingIds = new Set(current.map(a => a.id));
-            const newActivities = (res.activities || []).filter(a => !existingIds.has(a.id));
-            return [...current, ...newActivities];
-          });
+        const incomingActivities = res.activities || [];
+        const existingIds = new Set(this.activities().map(a => a.id));
+        const newActivities = incomingActivities.filter(a => !existingIds.has(a.id));
+
+        if (newActivities.length > 0) {
+          this.activities.update(current => [...current, ...newActivities]);
         }
 
         const newToken = res.nextPageToken;
-        if (newToken && newToken !== this.lastPageToken) {
-          this.lastPageToken = newToken;
+        if (newToken && newToken !== this.nextPageToken()) {
           this.nextPageToken.set(newToken);
           // Recursive call to get next page immediately
           this.pollCycle(id);
-        } else {
-          this.lastPageToken = newToken;
         }
 
         // Keep session state updated
@@ -294,6 +304,27 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   trackByActivityId(index: number, activity: Activity): string {
     return activity.id;
+  }
+
+  trackByFileName(index: number, file: any): string {
+    return file.fileName;
+  }
+
+  isDiffExpanded(activityId: string, fileName: string): boolean {
+    return this.expandedDiffs().has(`${activityId}-${fileName}`);
+  }
+
+  toggleDiff(activityId: string, fileName: string, open: boolean) {
+    const key = `${activityId}-${fileName}`;
+    this.expandedDiffs.update(current => {
+      const next = new Set(current);
+      if (open) {
+        next.add(key);
+      } else {
+        next.delete(key);
+      }
+      return next;
+    });
   }
 
   parseDiff(patch: string): { fileName: string; lines: { text: string; type: string }[] }[] {
