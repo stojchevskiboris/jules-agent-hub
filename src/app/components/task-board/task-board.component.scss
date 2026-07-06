@@ -162,9 +162,23 @@
 
   .task-header {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-    gap: 0.5rem;
+    flex-direction: column;
+    margin-bottom: 0.75rem;
+    gap: 0.4rem;
+
+    .header-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-time {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.7rem;
+      color: #8b949e;
+    }
 
     .task-id {
       font-family: monospace;
@@ -184,6 +198,16 @@
       &.completed, &.success { color: #3fb950; }
       &.failed { color: #f85149; }
       &.cancelled { color: #8b949e; }
+    }
+
+    .pr-link {
+      color: #3fb950;
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
+      margin-left: auto;
+      &:hover { text-decoration: underline; }
     }
   }
 
@@ -238,14 +262,6 @@
       &:hover { text-decoration: underline; }
     }
 
-    .pr-link {
-      color: #3fb950;
-      text-decoration: none;
-      font-size: 0.8rem;
-      font-weight: 500;
-      white-space: nowrap;
-      &:hover { text-decoration: underline; }
-    }
   }
 }
 

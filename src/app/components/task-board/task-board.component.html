@@ -35,8 +35,17 @@
           [routerLink]="['/workspace']"
           [queryParams]="{ sessionId: task.name }">
           <div class="task-header">
-            <span class="task-id">#{{ getShortName(task.name) }}</span>
-            <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state || 'ACTIVE' }}</span>
+            <div class="header-main">
+              <span class="task-id">#{{ getShortName(task.name) }}</span>
+              <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state || 'ACTIVE' }}</span>
+              <a *ngIf="getPullRequest(task) as pr" [href]="pr.url" target="_blank" class="pr-link" (click)="$event.stopPropagation()">
+                View PR
+              </a>
+            </div>
+            <div class="header-time">
+              <span>Started: {{ getStartedAt(task) | date:'shortTime' }}</span>
+              <span>Elapsed: {{ getElapsed(task) }}</span>
+            </div>
           </div>
           <h4 class="task-title">{{ truncateTitle(task.title) }}</h4>
           <p class="task-instruction">{{ task.prompt }}</p>
@@ -66,8 +75,16 @@
           [routerLink]="['/workspace']"
           [queryParams]="{ sessionId: task.name }">
           <div class="task-header">
-            <span class="task-id">#{{ getShortName(task.name) }}</span>
-            <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state }}</span>
+            <div class="header-main">
+              <span class="task-id">#{{ getShortName(task.name) }}</span>
+              <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state }}</span>
+              <a *ngIf="getPullRequest(task) as pr" [href]="pr.url" target="_blank" class="pr-link" (click)="$event.stopPropagation()">
+                View PR
+              </a>
+            </div>
+            <div class="header-time">
+              <span>Worked for: {{ getWorkedFor(task) }}</span>
+            </div>
           </div>
           <h4 class="task-title">{{ truncateTitle(task.title) }}</h4>
           <p class="task-instruction">{{ task.prompt }}</p>
@@ -78,11 +95,6 @@
             </div>
           </div>
           <div class="task-footer">
-            <ng-container *ngIf="getPullRequest(task) as pr">
-              <a [href]="pr.url" target="_blank" class="pr-link" (click)="$event.stopPropagation()">
-                View PR
-              </a>
-            </ng-container>
             <span class="btn-open">Details</span>
           </div>
         </div>

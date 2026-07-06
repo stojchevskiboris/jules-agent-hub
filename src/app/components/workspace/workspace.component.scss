@@ -174,6 +174,19 @@
         &.completed, &.success { color: #3fb950; }
         &.failed { color: #f85149; }
       }
+
+      .time-meta {
+        display: flex;
+        gap: 0.75rem;
+        font-size: 0.75rem;
+        color: #8b949e;
+        border-left: 1px solid #30363d;
+        padding-left: 0.75rem;
+
+        .time-item {
+          white-space: nowrap;
+        }
+      }
     }
     .source-info { font-size: 0.7rem; color: #8b949e; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   }
