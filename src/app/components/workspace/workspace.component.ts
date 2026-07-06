@@ -35,6 +35,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   loading = signal<boolean>(false);
   expandedDiffs = signal<Set<string>>(new Set());
   pollingSub?: Subscription;
+  currentTime = signal<Date>(new Date());
+  private timerInterval?: any;
 
   constructor() {
     effect(() => {
@@ -66,10 +68,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.activeSessionId.set(params['sessionId']);
       }
     });
+
+    this.timerInterval = setInterval(() => {
+      this.currentTime.set(new Date());
+    }, 1000);
   }
 
   ngOnDestroy() {
     this.stopPolling();
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+    }
   }
 
   createSession() {
@@ -286,6 +295,45 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   isAwaitingApproval() {
     return this.session()?.state === SessionState.AWAITING_PLAN_APPROVAL;
+  }
+
+  isFinished(): boolean {
+    const state = this.session()?.state;
+    return state === SessionState.COMPLETED || state === SessionState.FAILED;
+  }
+
+  getStartedAt(): Date | null {
+    const createTime = this.session()?.createTime;
+    return createTime ? new Date(createTime) : null;
+  }
+
+  getElapsed(): string {
+    const startedAt = this.getStartedAt();
+    if (!startedAt) return '0s';
+
+    const diff = Math.floor((this.currentTime().getTime() - startedAt.getTime()) / 1000);
+    return this.formatDuration(diff);
+  }
+
+  getWorkedFor(): string {
+    const session = this.session();
+    if (!session || !session.createTime || !session.updateTime) return '0s';
+
+    const start = new Date(session.createTime).getTime();
+    const end = new Date(session.updateTime).getTime();
+    const diff = Math.floor((end - start) / 1000);
+    return this.formatDuration(diff);
+  }
+
+  private formatDuration(seconds: number): string {
+    if (seconds < 0) seconds = 0;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
   }
 
   setAutomationMode(checked: boolean) {
