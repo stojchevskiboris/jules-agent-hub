@@ -71,15 +71,60 @@ describe('WorkspaceComponent (unit tests)', () => {
       });
     });
 
-    it('should parse mixed content', () => {
-      const text = 'Intro `inline` text.\n```ts\nconst x = 1;\n```\nOutro';
+    it('should parse headings', () => {
+      const text = '# Heading 1\n### Heading 3';
       const result = component.parseMarkdown(text);
-      expect(result).toHaveLength(5);
-      expect(result[0].type).toBe('text');
-      expect(result[1].type).toBe('inline-code');
-      expect(result[2].type).toBe('text');
-      expect(result[3].type).toBe('code-block');
-      expect(result[4].type).toBe('text');
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ type: 'heading', level: 1, content: [{ type: 'text', content: 'Heading 1' }] });
+      expect(result[1]).toEqual({ type: 'text', content: '\n' });
+      expect(result[2]).toEqual({ type: 'heading', level: 3, content: [{ type: 'text', content: 'Heading 3' }] });
+    });
+
+    it('should parse list items', () => {
+      const text = '- item 1\n* item 2';
+      const result = component.parseMarkdown(text);
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ type: 'list-item', content: [{ type: 'text', content: 'item 1' }] });
+      expect(result[1]).toEqual({ type: 'text', content: '\n' });
+      expect(result[2]).toEqual({ type: 'list-item', content: [{ type: 'text', content: 'item 2' }] });
+    });
+
+    it('should parse bold and italic', () => {
+      const text = '**bold** and *italic*';
+      const result = component.parseMarkdown(text);
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ type: 'bold', content: 'bold' });
+      expect(result[1]).toEqual({ type: 'text', content: ' and ' });
+      expect(result[2]).toEqual({ type: 'italic', content: 'italic' });
+    });
+
+    it('should parse mixed content', () => {
+      const text = '# Intro\nIntro `inline` text.\n```ts\nconst x = 1;\n```\n- item\n**Bold**';
+      const result = component.parseMarkdown(text);
+      // Expected segments:
+      // 0: heading Intro
+      // 1: text \n
+      // 2: text Intro
+      // 3: inline-code inline
+      // 4: text  text.\n
+      // 5: code-block
+      // 6: text \n (after code block)
+      // 7: list-item item
+      // 8: text \n (after list item)
+      // 9: bold Bold
+      expect(result).toHaveLength(10);
+      expect(result[0].type).toBe('heading');
+      expect(result[0].content[0].content).toBe('Intro');
+      expect(result[1].content).toBe('\n');
+      expect(result[2].content).toBe('Intro ');
+      expect(result[3].type).toBe('inline-code');
+      expect(result[4].content).toBe(' text.\n');
+      expect(result[5].type).toBe('code-block');
+      expect(result[6].content).toBe('\n');
+      expect(result[7].type).toBe('list-item');
+      expect(result[7].content[0].content).toBe('item');
+      expect(result[8].content).toBe('\n');
+      expect(result[9].type).toBe('bold');
     });
 
     it('should handle undefined text', () => {
