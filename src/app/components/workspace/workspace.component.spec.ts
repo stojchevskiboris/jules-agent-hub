@@ -32,6 +32,61 @@ vi.mock('@angular/router', () => ({
 describe('WorkspaceComponent (unit tests)', () => {
   const component = new WorkspaceComponent();
 
+  describe('parseMarkdown', () => {
+    it('should parse plain text', () => {
+      const text = 'Hello world';
+      const result = component.parseMarkdown(text);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({ type: 'text', content: 'Hello world' });
+    });
+
+    it('should parse inline code', () => {
+      const text = 'Use `code` here';
+      const result = component.parseMarkdown(text);
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ type: 'text', content: 'Use ' });
+      expect(result[1]).toEqual({ type: 'inline-code', content: 'code' });
+      expect(result[2]).toEqual({ type: 'text', content: ' here' });
+    });
+
+    it('should parse code blocks with language', () => {
+      const text = '```scss\n.body { color: red; }\n```';
+      const result = component.parseMarkdown(text);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        type: 'code-block',
+        language: 'scss',
+        content: '.body { color: red; }'
+      });
+    });
+
+    it('should parse code blocks without language', () => {
+      const text = '```\nplain text\n```';
+      const result = component.parseMarkdown(text);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        type: 'code-block',
+        language: 'text',
+        content: 'plain text'
+      });
+    });
+
+    it('should parse mixed content', () => {
+      const text = 'Intro `inline` text.\n```ts\nconst x = 1;\n```\nOutro';
+      const result = component.parseMarkdown(text);
+      expect(result).toHaveLength(5);
+      expect(result[0].type).toBe('text');
+      expect(result[1].type).toBe('inline-code');
+      expect(result[2].type).toBe('text');
+      expect(result[3].type).toBe('code-block');
+      expect(result[4].type).toBe('text');
+    });
+
+    it('should handle undefined text', () => {
+      expect(component.parseMarkdown(undefined)).toEqual([]);
+    });
+  });
+
   describe('parseDiff', () => {
     it('should parse a single file diff', () => {
       const patch = 'diff --git a/src/app.ts b/src/app.ts\nindex 123..456 100644\n--- a/src/app.ts\n+++ b/src/app.ts\n@@ -1,1 +1,1 @@\n-old line\n+new line\n context line';
