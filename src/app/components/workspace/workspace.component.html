@@ -90,6 +90,78 @@
                   <div class="code-header">{{ part.language }}</div>
                   <pre><code>{{ part.content }}</code></pre>
                 </div>
+                <h1 *ngIf="part.type === 'heading' && part.level === 1">
+                  <ng-container *ngFor="let inline of part.content">
+                    <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                    <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                    <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                    <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                  </ng-container>
+                </h1>
+                <h2 *ngIf="part.type === 'heading' && part.level === 2">
+                  <ng-container *ngFor="let inline of part.content">
+                    <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                    <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                    <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                    <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                  </ng-container>
+                </h2>
+                <h3 *ngIf="part.type === 'heading' && part.level === 3">
+                  <ng-container *ngFor="let inline of part.content">
+                    <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                    <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                    <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                    <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                  </ng-container>
+                </h3>
+                <h4 *ngIf="part.type === 'heading' && part.level === 4">
+                  <ng-container *ngFor="let inline of part.content">
+                    <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                    <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                    <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                    <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                  </ng-container>
+                </h4>
+                <h5 *ngIf="part.type === 'heading' && part.level === 5">
+                  <ng-container *ngFor="let inline of part.content">
+                    <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                    <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                    <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                    <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                  </ng-container>
+                </h5>
+                <h6 *ngIf="part.type === 'heading' && part.level === 6">
+                  <ng-container *ngFor="let inline of part.content">
+                    <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                    <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                    <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                    <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                  </ng-container>
+                </h6>
+                <strong *ngIf="part.type === 'bold'" class="bold-text">{{ part.content }}</strong>
+                <em *ngIf="part.type === 'italic'" class="italic-text">{{ part.content }}</em>
+                <div *ngIf="part.type === 'list-item'" class="list-item-wrapper">
+                  <span class="bullet">•</span>
+                  <span class="list-content">
+                    <ng-container *ngFor="let inline of part.content">
+                      <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                      <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                      <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                      <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                    </ng-container>
+                  </span>
+                </div>
+                <div *ngIf="part.type === 'ordered-list-item'" class="list-item-wrapper">
+                  <span class="bullet">{{ part.index }}.</span>
+                  <span class="list-content">
+                    <ng-container *ngFor="let inline of part.content">
+                      <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                      <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                      <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                      <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                    </ng-container>
+                  </span>
+                </div>
               </ng-container>
             </div>
 
@@ -101,6 +173,8 @@
                     <ng-container *ngFor="let part of parseMarkdown(step.title)">
                       <span *ngIf="part.type === 'text'">{{ part.content }}</span>
                       <code *ngIf="part.type === 'inline-code'" class="inline-code">{{ part.content }}</code>
+                      <strong *ngIf="part.type === 'bold'" class="bold-text">{{ part.content }}</strong>
+                      <em *ngIf="part.type === 'italic'" class="italic-text">{{ part.content }}</em>
                     </ng-container>
                   </strong>
                   <div class="step-description">
@@ -110,6 +184,78 @@
                       <div *ngIf="part.type === 'code-block'" class="code-block" [class]="'lang-' + part.language">
                         <div class="code-header">{{ part.language }}</div>
                         <pre><code>{{ part.content }}</code></pre>
+                      </div>
+                      <h1 *ngIf="part.type === 'heading' && part.level === 1">
+                        <ng-container *ngFor="let inline of part.content">
+                          <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                          <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                          <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                          <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                        </ng-container>
+                      </h1>
+                      <h2 *ngIf="part.type === 'heading' && part.level === 2">
+                        <ng-container *ngFor="let inline of part.content">
+                          <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                          <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                          <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                          <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                        </ng-container>
+                      </h2>
+                      <h3 *ngIf="part.type === 'heading' && part.level === 3">
+                        <ng-container *ngFor="let inline of part.content">
+                          <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                          <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                          <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                          <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                        </ng-container>
+                      </h3>
+                      <h4 *ngIf="part.type === 'heading' && part.level === 4">
+                        <ng-container *ngFor="let inline of part.content">
+                          <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                          <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                          <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                          <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                        </ng-container>
+                      </h4>
+                      <h5 *ngIf="part.type === 'heading' && part.level === 5">
+                        <ng-container *ngFor="let inline of part.content">
+                          <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                          <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                          <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                          <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                        </ng-container>
+                      </h5>
+                      <h6 *ngIf="part.type === 'heading' && part.level === 6">
+                        <ng-container *ngFor="let inline of part.content">
+                          <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                          <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                          <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                          <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                        </ng-container>
+                      </h6>
+                      <strong *ngIf="part.type === 'bold'" class="bold-text">{{ part.content }}</strong>
+                      <em *ngIf="part.type === 'italic'" class="italic-text">{{ part.content }}</em>
+                      <div *ngIf="part.type === 'list-item'" class="list-item-wrapper">
+                        <span class="bullet">•</span>
+                        <span class="list-content">
+                          <ng-container *ngFor="let inline of part.content">
+                            <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                            <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                            <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                            <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                          </ng-container>
+                        </span>
+                      </div>
+                      <div *ngIf="part.type === 'ordered-list-item'" class="list-item-wrapper">
+                        <span class="bullet">{{ part.index }}.</span>
+                        <span class="list-content">
+                          <ng-container *ngFor="let inline of part.content">
+                            <span *ngIf="inline.type === 'text'">{{ inline.content }}</span>
+                            <code *ngIf="inline.type === 'inline-code'" class="inline-code">{{ inline.content }}</code>
+                            <strong *ngIf="inline.type === 'bold'" class="bold-text">{{ inline.content }}</strong>
+                            <em *ngIf="inline.type === 'italic'" class="italic-text">{{ inline.content }}</em>
+                          </ng-container>
+                        </span>
                       </div>
                     </ng-container>
                   </div>

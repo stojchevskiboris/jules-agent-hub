@@ -244,6 +244,44 @@
           white-space: pre-wrap;
         }
 
+        .bold-text {
+          font-weight: bold;
+        }
+
+        .italic-text {
+          font-style: italic;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+          margin: 1rem 0 0.5rem 0;
+          font-weight: bold;
+          color: #f0f6fc;
+          line-height: 1.25;
+        }
+
+        h1 { font-size: 1.5rem; border-bottom: 1px solid #30363d; padding-bottom: 0.3rem; }
+        h2 { font-size: 1.3rem; border-bottom: 1px solid #30363d; padding-bottom: 0.3rem; }
+        h3 { font-size: 1.1rem; }
+        h4 { font-size: 1rem; }
+        h5 { font-size: 0.9rem; }
+        h6 { font-size: 0.85rem; color: #8b949e; }
+
+        .list-item-wrapper {
+          display: flex;
+          gap: 0.5rem;
+          margin-left: 1rem;
+          margin-bottom: 0.25rem;
+
+          .bullet {
+            color: #8b949e;
+            flex-shrink: 0;
+          }
+
+          .list-content {
+            flex: 1;
+          }
+        }
+
         .inline-code {
           background-color: rgba(110, 118, 129, 0.4);
           padding: 0.2em 0.4em;

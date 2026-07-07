@@ -387,11 +387,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  parseMarkdown(text: string | undefined): { type: 'text' | 'inline-code' | 'code-block'; content: string; language?: string }[] {
+  parseMarkdown(text: string | undefined): { type: string; content: string; language?: string; level?: number }[] {
     if (!text) return [];
 
-    const segments: { type: 'text' | 'inline-code' | 'code-block'; content: string; language?: string }[] = [];
-    // This regex looks for ```lang\ncode``` or ```code```
+    const segments: { type: string; content: string; language?: string; level?: number }[] = [];
     const codeBlockRegex = /```(\w+)?\n?([\s\S]*?)```/g;
     let lastIndex = 0;
     let match;
@@ -399,7 +398,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     while ((match = codeBlockRegex.exec(text)) !== null) {
       const before = text.substring(lastIndex, match.index);
       if (before) {
-        segments.push(...this.parseTextParts(before));
+        segments.push(...this.parseLineElements(before));
       }
 
       segments.push({
@@ -413,34 +412,102 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
     const remaining = text.substring(lastIndex);
     if (remaining) {
-      segments.push(...this.parseTextParts(remaining));
+      // If there's a code block before this, the remaining text might start with a newline
+      // that we want to preserve if it's not the only thing there.
+      segments.push(...this.parseLineElements(remaining));
     }
 
     return segments;
   }
 
-  private parseTextParts(text: string): { type: 'text' | 'inline-code'; content: string }[] {
-    const parts: { type: 'text' | 'inline-code'; content: string }[] = [];
-    const inlineCodeRegex = /`([^`]+)`/g;
-    let lastIndex = 0;
-    let match;
+  private parseLineElements(text: string): { type: string; content: any; level?: number }[] {
+    const lines = text.split('\n');
+    const result: any[] = [];
 
-    while ((match = inlineCodeRegex.exec(text)) !== null) {
-      const before = text.substring(lastIndex, match.index);
-      if (before) {
-        parts.push({ type: 'text', content: before });
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line === '' && i === lines.length - 1 && i > 0) continue;
+
+      // Heading: # Heading
+      const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+      if (headingMatch) {
+        result.push({
+          type: 'heading',
+          level: headingMatch[1].length,
+          content: this.parseInline(headingMatch[2])
+        });
+        if (i < lines.length - 1) result.push({ type: 'text', content: '\n' });
+        continue;
       }
 
-      parts.push({ type: 'inline-code', content: match[1] });
-      lastIndex = inlineCodeRegex.lastIndex;
-    }
+      // List item: - item or * item
+      const listMatch = line.match(/^([-*+])\s+(.*)$/);
+      if (listMatch) {
+        result.push({
+          type: 'list-item',
+          content: this.parseInline(listMatch[2])
+        });
+        if (i < lines.length - 1) result.push({ type: 'text', content: '\n' });
+        continue;
+      }
 
-    const remaining = text.substring(lastIndex);
-    if (remaining) {
-      parts.push({ type: 'text', content: remaining });
+      // Ordered list item: 1. item
+      const orderedListMatch = line.match(/^(\d+)\.\s+(.*)$/);
+      if (orderedListMatch) {
+        result.push({
+          type: 'ordered-list-item',
+          index: orderedListMatch[1],
+          content: this.parseInline(orderedListMatch[2])
+        });
+        if (i < lines.length - 1) result.push({ type: 'text', content: '\n' });
+        continue;
+      }
+
+      const isLastLine = i === lines.length - 1;
+      const content = line + (isLastLine ? '' : '\n');
+      if (content) {
+        result.push(...this.parseInline(content));
+      }
     }
+    return result;
+  }
+
+  private parseInline(text: string): { type: string; content: string }[] {
+    let parts: any[] = [{ type: 'text', content: text }];
+
+    // Inline code: `code`
+    parts = this.splitByRegex(parts, /`([^`]+)`/g, (m) => ({ type: 'inline-code', content: m[1] }));
+
+    // Bold: **bold** or __bold__
+    parts = this.splitByRegex(parts, /(\*\*|__)(.*?)\1/g, (m) => ({ type: 'bold', content: m[2] }));
+
+    // Italic: *italic* or _italic_
+    parts = this.splitByRegex(parts, /(\*|_)(.*?)\1/g, (m) => ({ type: 'italic', content: m[2] }));
 
     return parts;
+  }
+
+  private splitByRegex(parts: any[], regex: RegExp, creator: (match: RegExpExecArray) => any): any[] {
+    const result: any[] = [];
+    for (const part of parts) {
+      if (part.type !== 'text') {
+        result.push(part);
+        continue;
+      }
+      let lastIndex = 0;
+      let match;
+      const text = part.content;
+      regex.lastIndex = 0;
+      while ((match = regex.exec(text)) !== null) {
+        const before = text.substring(lastIndex, match.index);
+        if (before) result.push({ type: 'text', content: before });
+        result.push(creator(match));
+        lastIndex = regex.lastIndex;
+      }
+      const remaining = text.substring(lastIndex);
+      if (remaining) result.push({ type: 'text', content: remaining });
+    }
+    return result;
   }
 
   parseDiff(patch: string): { fileName: string; lines: { text: string; type: string }[] }[] {
