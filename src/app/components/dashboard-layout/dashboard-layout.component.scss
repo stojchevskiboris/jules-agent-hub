@@ -246,6 +246,24 @@
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 4px;
+
+          .name-text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+
+          .unmerged-icon {
+            font-size: 0.9rem;
+            flex-shrink: 0;
+          }
         }
       }
     }

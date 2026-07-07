@@ -139,6 +139,7 @@ export interface PullRequest {
   title: string;
   description: string;
   number?: number;
+  merged?: boolean;
 }
 
 export interface SessionOutput {

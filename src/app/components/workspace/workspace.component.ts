@@ -289,12 +289,24 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
+  getPullRequest() {
+    return this.session()?.outputs?.find(o => o.pullRequest)?.pullRequest;
+  }
+
   getPullRequestUrl(): string | undefined {
-    return this.session()?.outputs?.find(o => o.pullRequest)?.pullRequest?.url;
+    return this.getPullRequest()?.url;
   }
 
   isAwaitingApproval() {
     return this.session()?.state === SessionState.AWAITING_PLAN_APPROVAL;
+  }
+
+  isAwaitingFeedback() {
+    return this.session()?.state === SessionState.AWAITING_USER_FEEDBACK;
+  }
+
+  isInProgress() {
+    return this.session()?.state === SessionState.IN_PROGRESS;
   }
 
   isFinished(): boolean {

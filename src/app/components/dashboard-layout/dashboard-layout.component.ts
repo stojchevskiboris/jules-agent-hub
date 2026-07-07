@@ -199,6 +199,14 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     return title.substring(0, maxLength) + '...';
   }
 
+  getPullRequest(session: Session) {
+    return session.outputs?.find(o => o.pullRequest)?.pullRequest;
+  }
+
+  isAwaitingFeedback(session: Session) {
+    return session.state === 'AWAITING_USER_FEEDBACK';
+  }
+
   setApiKey() {
     const key = prompt('Enter your Jules API Key:');
     if (key) {
