@@ -7,6 +7,14 @@ import { Subscription, interval, startWith } from 'rxjs';
 import { JulesApiService } from '../../services/jules-api.service';
 import { Session, Activity, AutomationMode, SessionState } from '../../models/jules.models';
 
+interface MarkdownPart {
+  type: string;
+  content: string | MarkdownPart[];
+  language?: string;
+  level?: number;
+  index?: string | number;
+}
+
 @Component({
   selector: 'app-workspace',
   standalone: true,
@@ -387,10 +395,14 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  parseMarkdown(text: string | undefined): { type: string; content: string; language?: string; level?: number }[] {
+  asArray(content: string | MarkdownPart[]): MarkdownPart[] {
+    return Array.isArray(content) ? content : [];
+  }
+
+  parseMarkdown(text: string | undefined): MarkdownPart[] {
     if (!text) return [];
 
-    const segments: { type: string; content: string; language?: string; level?: number }[] = [];
+    const segments: MarkdownPart[] = [];
     const codeBlockRegex = /```(\w+)?\n?([\s\S]*?)```/g;
     let lastIndex = 0;
     let match;
@@ -420,9 +432,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return segments;
   }
 
-  private parseLineElements(text: string): { type: string; content: any; level?: number }[] {
+  private parseLineElements(text: string): MarkdownPart[] {
     const lines = text.split('\n');
-    const result: any[] = [];
+    const result: MarkdownPart[] = [];
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -472,8 +484,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return result;
   }
 
-  private parseInline(text: string): { type: string; content: string }[] {
-    let parts: any[] = [{ type: 'text', content: text }];
+  private parseInline(text: string): MarkdownPart[] {
+    let parts: MarkdownPart[] = [{ type: 'text', content: text }];
 
     // Inline code: `code`
     parts = this.splitByRegex(parts, /`([^`]+)`/g, (m) => ({ type: 'inline-code', content: m[1] }));
@@ -487,8 +499,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     return parts;
   }
 
-  private splitByRegex(parts: any[], regex: RegExp, creator: (match: RegExpExecArray) => any): any[] {
-    const result: any[] = [];
+  private splitByRegex(parts: MarkdownPart[], regex: RegExp, creator: (match: RegExpExecArray) => MarkdownPart): MarkdownPart[] {
+    const result: MarkdownPart[] = [];
     for (const part of parts) {
       if (part.type !== 'text') {
         result.push(part);
@@ -496,7 +508,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       }
       let lastIndex = 0;
       let match;
-      const text = part.content;
+      const text = part.content as string;
       regex.lastIndex = 0;
       while ((match = regex.exec(text)) !== null) {
         const before = text.substring(lastIndex, match.index);
