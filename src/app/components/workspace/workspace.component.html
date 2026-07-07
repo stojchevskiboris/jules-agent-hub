@@ -42,17 +42,23 @@
       <div class="session-info">
         <a routerLink="/tasks" class="btn-back-icon" title="Back to Task Board">←</a>
         <h3>{{ truncateTitle(session()?.title || getShortName(session()?.name || ''), 30) }}</h3>
-        <span class="status-badge" [class]="session()?.state?.toLowerCase()">{{ session()?.state }}</span>
+        <span class="status-badge" [class]="session()?.state?.toLowerCase()">
+          {{ session()?.state }}
+          <span *ngIf="isAwaitingFeedback()">🧙‍♂️</span>
+        </span>
 
         <div *ngIf="!isFinished()" class="time-meta">
           <span class="time-item">Started at: {{ getStartedAt() | date:'shortTime' }}</span>
-          <span class="time-item">Elapsed: {{ getElapsed() }}</span>
+          <span class="time-item" *ngIf="isInProgress()">Elapsed: {{ getElapsed() }}</span>
         </div>
         <div *ngIf="isFinished()" class="time-meta">
           <span class="time-item">Worked for: {{ getWorkedFor() }}</span>
         </div>
 
-        <a *ngIf="getPullRequestUrl()" [href]="getPullRequestUrl()" target="_blank" class="btn-pr">View PR</a>
+        <div class="pr-link-wrapper" *ngIf="getPullRequest() as pr">
+          <span *ngIf="pr.merged === false" class="unmerged-icon" title="PR is not merged">🧩</span>
+          <a [href]="pr.url" target="_blank" class="btn-pr">View PR</a>
+        </div>
       </div>
       <div class="source-info">
         Source: {{ session()?.sourceContext?.source }}

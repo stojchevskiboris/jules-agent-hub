@@ -44,7 +44,7 @@
             </div>
             <div class="header-time">
               <span>Started: {{ getStartedAt(task) | date:'shortTime' }}</span>
-              <span>Elapsed: {{ getElapsed(task) }}</span>
+              <span *ngIf="task.state === 'IN_PROGRESS'">Elapsed: {{ getElapsed(task) }}</span>
             </div>
           </div>
           <h4 class="task-title">{{ truncateTitle(task.title) }}</h4>

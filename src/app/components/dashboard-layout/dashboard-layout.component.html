@@ -40,7 +40,13 @@
         <ul class="sessions-list">
           <li *ngFor="let session of sessions()" (click)="selectSession(session)" class="session-item"
               [class.active]="currentSessionId() === session.name">
-            <span class="session-name">{{ truncateTitle(session.title || getShortName(session.name), 30) }}</span>
+            <span class="session-name">
+              <span class="name-text">
+                {{ truncateTitle(session.title || getShortName(session.name), 30) }}
+                <span *ngIf="isAwaitingFeedback(session)">🧙‍♂️</span>
+              </span>
+              <span *ngIf="getPullRequest(session)?.merged === false" class="unmerged-icon" title="PR is not merged">🧩</span>
+            </span>
           </li>
         </ul>
         <div *ngIf="sessionNextPageToken()" class="load-more-container">
