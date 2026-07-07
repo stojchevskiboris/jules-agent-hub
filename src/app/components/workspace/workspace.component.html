@@ -57,6 +57,7 @@
 
         <div class="pr-link-wrapper" *ngIf="getPullRequest() as pr">
           <span *ngIf="pr.merged === false" class="unmerged-icon" title="PR is not merged">🧩</span>
+          <span *ngIf="pr.merged && session()?.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
           <a [href]="pr.url" target="_blank" class="btn-pr">View PR</a>
         </div>
       </div>

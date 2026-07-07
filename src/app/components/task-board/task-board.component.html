@@ -38,9 +38,12 @@
             <div class="header-main">
               <span class="task-id">#{{ getShortName(task.name) }}</span>
               <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state || 'ACTIVE' }}</span>
-              <a *ngIf="getPullRequest(task) as pr" [href]="pr.url" target="_blank" class="pr-link" (click)="$event.stopPropagation()">
-                View PR
-              </a>
+              <ng-container *ngIf="getPullRequest(task) as pr">
+                <span *ngIf="pr.merged && task.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
+                <a [href]="pr.url" target="_blank" class="pr-link" (click)="$event.stopPropagation()">
+                  View PR
+                </a>
+              </ng-container>
             </div>
             <div class="header-time">
               <span>Started: {{ getStartedAt(task) | date:'shortTime' }}</span>
@@ -78,9 +81,12 @@
             <div class="header-main">
               <span class="task-id">#{{ getShortName(task.name) }}</span>
               <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state }}</span>
-              <a *ngIf="getPullRequest(task) as pr" [href]="pr.url" target="_blank" class="pr-link" (click)="$event.stopPropagation()">
-                View PR
-              </a>
+              <ng-container *ngIf="getPullRequest(task) as pr">
+                <span *ngIf="pr.merged && task.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
+                <a [href]="pr.url" target="_blank" class="pr-link" (click)="$event.stopPropagation()">
+                  View PR
+                </a>
+              </ng-container>
             </div>
             <div class="header-time">
               <span>Worked for: {{ getWorkedFor(task) }}</span>

@@ -209,6 +209,13 @@
       margin-left: auto;
       &:hover { text-decoration: underline; }
     }
+
+    .merged-icon {
+      font-size: 0.9rem;
+      margin-left: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+    }
   }
 
   .task-title {
