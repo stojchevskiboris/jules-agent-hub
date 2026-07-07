@@ -240,6 +240,52 @@
           margin-bottom: 0.75rem;
         }
 
+        .text-part {
+          white-space: pre-wrap;
+        }
+
+        .inline-code {
+          background-color: rgba(110, 118, 129, 0.4);
+          padding: 0.2em 0.4em;
+          border-radius: 6px;
+          font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+          font-size: 85%;
+          color: #c9d1d9;
+        }
+
+        .code-block {
+          margin: 0.75rem 0;
+          background: #0d1117;
+          border: 1px solid #30363d;
+          border-radius: 6px;
+          overflow: hidden;
+          border-left: 4px solid #8b949e;
+
+          &.lang-scss { border-left-color: #c6538c; }
+          &.lang-html { border-left-color: #e34c26; }
+          &.lang-ts, &.lang-typescript { border-left-color: #3178c6; }
+          &.lang-json { border-left-color: #cbcb41; }
+          &.lang-bash { border-left-color: #4eadc7; }
+          &.lang-yaml, &.lang-yml { border-left-color: #cb171e; }
+
+          .code-header {
+            padding: 0.25rem 0.75rem;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            font-size: 0.7rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            font-weight: bold;
+          }
+
+          pre {
+            margin: 0;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 0;
+          }
+        }
+
         .plan-details {
           background: #0d1117;
           border: 1px solid #30363d;
@@ -256,7 +302,7 @@
               margin-bottom: 1rem;
               &:last-child { margin-bottom: 0; }
               strong { color: #58a6ff; display: block; margin-bottom: 0.25rem; }
-              p { margin: 0; font-size: 0.85rem; color: #8b949e; }
+              .step-description { margin: 0; font-size: 0.85rem; color: #8b949e; }
             }
           }
         }

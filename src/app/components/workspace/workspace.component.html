@@ -82,14 +82,37 @@
             <span class="time">{{ activity.createTime | date:'shortTime' }}</span>
           </div>
           <div class="activity-text">
-            <div class="message-content">{{ getActivityMessage(activity) }}</div>
+            <div class="message-content">
+              <ng-container *ngFor="let part of parseMarkdown(getActivityMessage(activity))">
+                <span *ngIf="part.type === 'text'" class="text-part">{{ part.content }}</span>
+                <code *ngIf="part.type === 'inline-code'" class="inline-code">{{ part.content }}</code>
+                <div *ngIf="part.type === 'code-block'" class="code-block" [class]="'lang-' + part.language">
+                  <div class="code-header">{{ part.language }}</div>
+                  <pre><code>{{ part.content }}</code></pre>
+                </div>
+              </ng-container>
+            </div>
 
             <!-- Rich Plan Display -->
             <div *ngIf="activity.planGenerated" class="plan-details">
               <ul class="plan-steps">
                 <li *ngFor="let step of activity.planGenerated.plan.steps">
-                  <strong>Step {{ (step.index ?? 0) + 1 }}: {{ step.title }}</strong>
-                  <p>{{ step.description }}</p>
+                  <strong>Step {{ (step.index ?? 0) + 1 }}:
+                    <ng-container *ngFor="let part of parseMarkdown(step.title)">
+                      <span *ngIf="part.type === 'text'">{{ part.content }}</span>
+                      <code *ngIf="part.type === 'inline-code'" class="inline-code">{{ part.content }}</code>
+                    </ng-container>
+                  </strong>
+                  <div class="step-description">
+                    <ng-container *ngFor="let part of parseMarkdown(step.description)">
+                      <span *ngIf="part.type === 'text'" class="text-part">{{ part.content }}</span>
+                      <code *ngIf="part.type === 'inline-code'" class="inline-code">{{ part.content }}</code>
+                      <div *ngIf="part.type === 'code-block'" class="code-block" [class]="'lang-' + part.language">
+                        <div class="code-header">{{ part.language }}</div>
+                        <pre><code>{{ part.content }}</code></pre>
+                      </div>
+                    </ng-container>
+                  </div>
                 </li>
               </ul>
             </div>

@@ -387,6 +387,62 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
+  parseMarkdown(text: string | undefined): { type: 'text' | 'inline-code' | 'code-block'; content: string; language?: string }[] {
+    if (!text) return [];
+
+    const segments: { type: 'text' | 'inline-code' | 'code-block'; content: string; language?: string }[] = [];
+    // This regex looks for ```lang\ncode``` or ```code```
+    const codeBlockRegex = /```(\w+)?\n?([\s\S]*?)```/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = codeBlockRegex.exec(text)) !== null) {
+      const before = text.substring(lastIndex, match.index);
+      if (before) {
+        segments.push(...this.parseTextParts(before));
+      }
+
+      segments.push({
+        type: 'code-block',
+        language: match[1] || 'text',
+        content: match[2].trim()
+      });
+
+      lastIndex = codeBlockRegex.lastIndex;
+    }
+
+    const remaining = text.substring(lastIndex);
+    if (remaining) {
+      segments.push(...this.parseTextParts(remaining));
+    }
+
+    return segments;
+  }
+
+  private parseTextParts(text: string): { type: 'text' | 'inline-code'; content: string }[] {
+    const parts: { type: 'text' | 'inline-code'; content: string }[] = [];
+    const inlineCodeRegex = /`([^`]+)`/g;
+    let lastIndex = 0;
+    let match;
+
+    while ((match = inlineCodeRegex.exec(text)) !== null) {
+      const before = text.substring(lastIndex, match.index);
+      if (before) {
+        parts.push({ type: 'text', content: before });
+      }
+
+      parts.push({ type: 'inline-code', content: match[1] });
+      lastIndex = inlineCodeRegex.lastIndex;
+    }
+
+    const remaining = text.substring(lastIndex);
+    if (remaining) {
+      parts.push({ type: 'text', content: remaining });
+    }
+
+    return parts;
+  }
+
   parseDiff(patch: string): { fileName: string; lines: { text: string; type: string }[] }[] {
     const files: { fileName: string; lines: { text: string; type: string }[] }[] = [];
     const lines = patch.split('\n');
