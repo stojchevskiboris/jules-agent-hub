@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, inject, signal, effect, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -22,11 +22,13 @@ interface MarkdownPart {
   templateUrl: './workspace.component.html',
   styleUrl: './workspace.component.scss'
 })
-export class WorkspaceComponent implements OnInit, OnDestroy {
+export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly apiService = inject(JulesApiService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly sanitizer = inject(DomSanitizer);
+
+  @ViewChild('scrollContainer') activityFeed?: ElementRef<HTMLDivElement>;
 
   selectedSource = signal<string | null>(null);
   defaultBranch = signal<string | null>(null);
@@ -41,6 +43,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   isSendingMessage = signal<boolean>(false);
 
   loading = signal<boolean>(false);
+  showScrollButton = signal<boolean>(false);
+  hasNewMessages = signal<boolean>(false);
   expandedDiffs = signal<Set<string>>(new Set());
   pollingSub?: Subscription;
   currentTime = signal<Date>(new Date());
@@ -56,6 +60,10 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         this.stopPolling();
       }
     });
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => this.onScroll(), 500);
   }
 
   ngOnInit() {
@@ -87,6 +95,31 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
+  }
+
+  checkIfAtBottom(): boolean {
+    if (!this.activityFeed) return false;
+    const el = this.activityFeed.nativeElement;
+    // Threshold of 20px to consider "at bottom"
+    return el.scrollHeight - el.scrollTop <= el.clientHeight + 20;
+  }
+
+  onScroll() {
+    const atBottom = this.checkIfAtBottom();
+    this.showScrollButton.set(!atBottom);
+    if (atBottom) {
+      this.hasNewMessages.set(false);
+    }
+  }
+
+  scrollToBottom() {
+    setTimeout(() => {
+      if (this.activityFeed) {
+        const el = this.activityFeed.nativeElement;
+        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+        this.hasNewMessages.set(false);
+      }
+    }, 0);
   }
 
   createSession() {
@@ -169,8 +202,18 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
         const existingIds = new Set(this.activities().map(a => a.id));
         const newActivities = incomingActivities.filter(a => !existingIds.has(a.id));
 
+        const wasAtBottom = this.checkIfAtBottom();
+
         if (newActivities.length > 0) {
           this.activities.update(current => [...current, ...newActivities]);
+
+          if (this.isInProgress()) {
+            if (wasAtBottom) {
+              this.scrollToBottom();
+            } else {
+              this.hasNewMessages.set(true);
+            }
+          }
         }
 
         const newToken = res.nextPageToken;

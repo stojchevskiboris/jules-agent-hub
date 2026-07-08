@@ -198,6 +198,14 @@
     overflow: hidden;
   }
 
+  .feed-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
   .activity-feed {
     flex: 1;
     overflow-y: auto;
@@ -458,6 +466,45 @@
     }
 
     .no-activity { text-align: center; color: #8b949e; padding: 2rem; }
+  }
+
+  .btn-scroll-bottom {
+    position: absolute;
+    bottom: 1rem;
+    right: 1.5rem;
+    background-color: #21262d;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #30363d;
+      border-color: #8b949e;
+    }
+
+    &.has-new {
+      background-color: #1f6feb;
+      color: white;
+      border-color: #388bfd;
+      animation: pulse 2s infinite;
+
+      &:hover {
+        background-color: #388bfd;
+      }
+    }
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
   }
 
   .approval-bar {
