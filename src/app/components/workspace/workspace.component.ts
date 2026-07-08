@@ -565,7 +565,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
     return result;
   }
 
-  parseDiff(patch: string): { fileName: string; lines: { text: string; type: string }[] }[] {
+  parseDiff(patch: string | undefined | null): { fileName: string; lines: { text: string; type: string }[] }[] {
+    if (!patch) return [];
     const files: { fileName: string; lines: { text: string; type: string }[] }[] = [];
     const lines = patch.split('\n');
     let currentFile: { fileName: string; lines: { text: string; type: string }[] } | null = null;

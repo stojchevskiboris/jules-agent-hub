@@ -158,6 +158,11 @@ describe('WorkspaceComponent (unit tests)', () => {
       const result = component.parseDiff(patch);
       expect(result[0].fileName).toBe('unknown file');
     });
+
+    it('should handle null or undefined patch gracefully', () => {
+      expect(component.parseDiff(null as any)).toEqual([]);
+      expect(component.parseDiff(undefined as any)).toEqual([]);
+    });
   });
 
   describe('chat sending state', () => {
