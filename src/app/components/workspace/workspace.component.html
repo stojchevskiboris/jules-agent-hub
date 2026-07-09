@@ -274,7 +274,7 @@
                   <div *ngIf="artifact.changeSet" class="changeset-artifact">
                     <div class="artifact-header">Suggested Changes</div>
                     <div class="diff-accordion">
-                      <details *ngFor="let file of parseDiff(artifact.changeSet.gitPatch.unidiffPatch); trackBy: trackByFileName"
+                      <details *ngFor="let file of parseDiff(artifact.changeSet?.gitPatch?.unidiffPatch); trackBy: trackByFileName"
                         class="file-diff"
                         [open]="isDiffExpanded(activity.id, file.fileName)"
                         (toggle)="toggleDiff(activity.id, file.fileName, $any($event.target).open)">
