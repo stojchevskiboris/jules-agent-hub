@@ -37,7 +37,7 @@
           <div class="task-header">
             <div class="header-main">
               <span class="task-id">#{{ getShortName(task.name) }}</span>
-              <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state || 'ACTIVE' }}</span>
+              <span class="status-badge" [class]="getStateUI(task.state).class" [title]="getStateUI(task.state).description">{{ getStateUI(task.state).name }}</span>
               <ng-container *ngIf="getPullRequest(task) as pr">
                 <span *ngIf="pr.merged && task.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
                 <a [href]="pr.url" target="_blank" class="pr-link" (click)="$event.stopPropagation()">
@@ -80,7 +80,7 @@
           <div class="task-header">
             <div class="header-main">
               <span class="task-id">#{{ getShortName(task.name) }}</span>
-              <span class="task-state" [class]="task.state?.toLowerCase()">{{ task.state }}</span>
+              <span class="status-badge" [class]="getStateUI(task.state).class" [title]="getStateUI(task.state).description">{{ getStateUI(task.state).name }}</span>
               <ng-container *ngIf="getPullRequest(task) as pr">
                 <span *ngIf="pr.merged && task.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
                 <a [href]="pr.url" target="_blank" class="pr-link" (click)="$event.stopPropagation()">

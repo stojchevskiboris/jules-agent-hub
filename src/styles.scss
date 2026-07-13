@@ -63,3 +63,69 @@ html {
     font-size: 16px;
   }
 }
+
+/* Status Badges */
+.status-badge {
+  font-size: 0.65rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  background: #21262d;
+  text-transform: uppercase;
+  white-space: nowrap;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  &.queued {
+    color: #8b949e;
+    background: rgba(110, 118, 129, 0.1);
+    border: 1px solid rgba(110, 118, 129, 0.2);
+  }
+
+  &.planning {
+    color: #bc8cff;
+    background: rgba(188, 140, 255, 0.1);
+    border: 1px solid rgba(188, 140, 255, 0.2);
+  }
+
+  &.awaiting-approval {
+    color: #d29922;
+    background: rgba(210, 153, 34, 0.1);
+    border: 1px solid rgba(210, 153, 34, 0.2);
+  }
+
+  &.awaiting-feedback {
+    color: #db6d28;
+    background: rgba(219, 109, 40, 0.1);
+    border: 1px solid rgba(219, 109, 40, 0.2);
+  }
+
+  &.in-progress {
+    color: #58a6ff;
+    background: rgba(88, 166, 255, 0.1);
+    border: 1px solid rgba(88, 166, 255, 0.2);
+  }
+
+  &.paused {
+    color: #8b949e;
+    background: rgba(110, 118, 129, 0.1);
+    border: 1px solid rgba(110, 118, 129, 0.2);
+  }
+
+  &.completed {
+    color: #3fb950;
+    background: rgba(63, 185, 80, 0.1);
+    border: 1px solid rgba(63, 185, 80, 0.2);
+  }
+
+  &.failed {
+    color: #f85149;
+    background: rgba(248, 81, 73, 0.1);
+    border: 1px solid rgba(248, 81, 73, 0.2);
+  }
+
+  &.unknown {
+    color: #8b949e;
+  }
+}

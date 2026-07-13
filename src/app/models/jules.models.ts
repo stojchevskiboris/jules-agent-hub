@@ -10,6 +10,59 @@ export enum SessionState {
   COMPLETED = 'COMPLETED'
 }
 
+export const SESSION_STATE_UI: Record<string, { name: string; class: string; description: string }> = {
+  [SessionState.QUEUED]: {
+    name: 'Queued',
+    class: 'queued',
+    description: 'Session is waiting to be processed'
+  },
+  [SessionState.PLANNING]: {
+    name: 'Planning',
+    class: 'planning',
+    description: 'Jules is analyzing the task and creating a plan'
+  },
+  [SessionState.AWAITING_PLAN_APPROVAL]: {
+    name: 'Awaiting Approval',
+    class: 'awaiting-approval',
+    description: 'Plan is ready and waiting for user approval'
+  },
+  [SessionState.AWAITING_USER_FEEDBACK]: {
+    name: 'Awaiting Feedback',
+    class: 'awaiting-feedback',
+    description: 'Jules needs additional input from the user'
+  },
+  [SessionState.IN_PROGRESS]: {
+    name: 'In Progress',
+    class: 'in-progress',
+    description: 'Jules is actively working on the task'
+  },
+  [SessionState.PAUSED]: {
+    name: 'Paused',
+    class: 'paused',
+    description: 'Session is paused'
+  },
+  [SessionState.COMPLETED]: {
+    name: 'Completed',
+    class: 'completed',
+    description: 'Task completed successfully'
+  },
+  [SessionState.FAILED]: {
+    name: 'Failed',
+    class: 'failed',
+    description: 'Task failed to complete'
+  },
+  [SessionState.STATE_UNSPECIFIED]: {
+    name: 'Unknown',
+    class: 'unknown',
+    description: 'Session state is unspecified'
+  }
+};
+
+export function getSessionStateUI(state: SessionState | string | undefined) {
+  if (!state) return SESSION_STATE_UI[SessionState.STATE_UNSPECIFIED];
+  return SESSION_STATE_UI[state] || SESSION_STATE_UI[SessionState.STATE_UNSPECIFIED];
+}
+
 export enum AutomationMode {
   AUTOMATION_MODE_UNSPECIFIED = 'AUTOMATION_MODE_UNSPECIFIED',
   AUTO_CREATE_PR = 'AUTO_CREATE_PR'

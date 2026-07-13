@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { JulesApiService } from '../../services/jules-api.service';
-import { Session, SessionState } from '../../models/jules.models';
+import { Session, SessionState, getSessionStateUI } from '../../models/jules.models';
 
 @Component({
   selector: 'app-task-board',
@@ -88,6 +88,8 @@ export class TaskBoardComponent implements OnInit, OnDestroy {
     if (title.length <= maxLength) return title;
     return title.substring(0, maxLength) + '...';
   }
+
+  getStateUI = getSessionStateUI;
 
   setStateFilter(state: string) {
     this.selectedState.set(state);

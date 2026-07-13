@@ -186,20 +186,6 @@
       font-size: 0.8rem;
     }
 
-    .task-state {
-      font-size: 0.7rem;
-      padding: 0.1rem 0.4rem;
-      border-radius: 4px;
-      background: #21262d;
-      text-transform: uppercase;
-      white-space: nowrap;
-
-      &.open, &.active { color: #d29922; }
-      &.completed, &.success { color: #3fb950; }
-      &.failed { color: #f85149; }
-      &.cancelled { color: #8b949e; }
-    }
-
     .pr-link {
       color: #3fb950;
       text-decoration: none;

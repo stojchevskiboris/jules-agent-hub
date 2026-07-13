@@ -5,7 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { Subscription, interval, startWith } from 'rxjs';
 import { JulesApiService } from '../../services/jules-api.service';
-import { Session, Activity, AutomationMode, SessionState } from '../../models/jules.models';
+import { Session, Activity, AutomationMode, SessionState, getSessionStateUI } from '../../models/jules.models';
 
 interface MarkdownPart {
   type: string;
@@ -420,6 +420,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
   trackByFileName(index: number, file: any): string {
     return file.fileName;
   }
+
+  getStateUI = getSessionStateUI;
 
   isDiffExpanded(activityId: string, fileName: string): boolean {
     return this.expandedDiffs().has(`${activityId}-${fileName}`);
