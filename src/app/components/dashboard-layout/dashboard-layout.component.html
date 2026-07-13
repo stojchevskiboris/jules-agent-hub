@@ -45,6 +45,7 @@
                 {{ truncateTitle(session.title || getShortName(session.name), 30) }}
                 <span *ngIf="isAwaitingFeedback(session)">🧙‍♂️</span>
               </span>
+              <span class="status-dot" [class]="getStateUI(session.state).class" [title]="getStateUI(session.state).description"></span>
               <span *ngIf="getPullRequest(session)?.merged === false" class="unmerged-icon" title="PR is not merged">🧩</span>
               <span *ngIf="getPullRequest(session)?.merged && session.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
             </span>

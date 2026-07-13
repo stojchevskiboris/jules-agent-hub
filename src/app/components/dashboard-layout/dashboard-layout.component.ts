@@ -5,7 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { JulesApiService } from '../../services/jules-api.service';
-import { Source, Session } from '../../models/jules.models';
+import { Source, Session, getSessionStateUI, SessionState } from '../../models/jules.models';
 
 const API_KEY_ERROR_MESSAGE = 'Jules API key is needed';
 
@@ -206,6 +206,8 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
   isAwaitingFeedback(session: Session) {
     return session.state === 'AWAITING_USER_FEEDBACK';
   }
+
+  getStateUI = getSessionStateUI;
 
   setApiKey() {
     const key = prompt('Enter your Jules API Key:');

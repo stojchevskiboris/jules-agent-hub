@@ -164,15 +164,7 @@
       }
 
       .status-badge {
-        font-size: 0.65rem;
-        padding: 0.2rem 0.4rem;
-        border-radius: 10px;
-        background: #21262d;
-        text-transform: uppercase;
-        white-space: nowrap;
-        &.open, &.active { color: #d29922; }
-        &.completed, &.success { color: #3fb950; }
-        &.failed { color: #f85149; }
+        // Shared styles in src/styles.scss
       }
 
       .time-meta {
