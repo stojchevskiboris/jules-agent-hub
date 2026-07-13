@@ -17,6 +17,7 @@ export class TaskBoardComponent implements OnInit, OnDestroy {
   sessions = signal<Session[]>([]);
   loading = signal<boolean>(true);
   selectedState = signal<string>('ALL');
+  activeTab = signal<'ACTIVE' | 'ARCHIVED'>('ACTIVE');
   currentTime = signal<Date>(new Date());
   private timerInterval?: any;
 
@@ -93,6 +94,10 @@ export class TaskBoardComponent implements OnInit, OnDestroy {
 
   setStateFilter(state: string) {
     this.selectedState.set(state);
+  }
+
+  setActiveTab(tab: 'ACTIVE' | 'ARCHIVED') {
+    this.activeTab.set(tab);
   }
 
   getPullRequest(session: Session) {
