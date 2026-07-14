@@ -15,7 +15,9 @@ export class TaskBoardComponent implements OnInit, OnDestroy {
   private readonly apiService = inject(JulesApiService);
 
   sessions = signal<Session[]>([]);
+  nextPageToken = signal<string | null>(null);
   loading = signal<boolean>(true);
+  loadingMore = signal<boolean>(false);
   selectedState = signal<string>('ALL');
   activeTab = signal<'ACTIVE' | 'ARCHIVED'>('ACTIVE');
   currentTime = signal<Date>(new Date());
@@ -66,18 +68,37 @@ export class TaskBoardComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadSessions() {
-    this.loading.set(true);
-    this.apiService.getSessions().subscribe({
+  loadSessions(pageToken?: string) {
+    if (pageToken) {
+      this.loadingMore.set(true);
+    } else {
+      this.loading.set(true);
+    }
+    this.apiService.getSessions(pageToken).subscribe({
       next: (res) => {
-        this.sessions.set(res.sessions || []);
-        this.loading.set(false);
+        const newSessions = res.sessions || [];
+        if (pageToken) {
+          this.sessions.set([...this.sessions(), ...newSessions]);
+          this.loadingMore.set(false);
+        } else {
+          this.sessions.set(newSessions);
+          this.loading.set(false);
+        }
+        this.nextPageToken.set(res.nextPageToken || null);
       },
       error: (err) => {
         this.loading.set(false);
+        this.loadingMore.set(false);
         console.error(err);
       }
     });
+  }
+
+  loadMoreSessions() {
+    const token = this.nextPageToken();
+    if (token) {
+      this.loadSessions(token);
+    }
   }
 
   getShortName(fullName: string): string {
