@@ -1,7 +1,7 @@
 import '@angular/compiler';
 import { WorkspaceComponent } from './workspace.component';
 import { Activity, Session } from '../../models/jules.models';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { of } from 'rxjs';
 
 // Mock Angular's inject and signal
@@ -394,6 +394,133 @@ describe('WorkspaceComponent (unit tests)', () => {
       expect(component.isDiffExpanded('a1', 'f2')).toBe(true);
       expect(component.isDiffExpanded('a2', 'f1')).toBe(true);
       expect(component.isDiffExpanded('a2', 'f2')).toBe(false);
+    });
+  });
+
+  describe('In-Place Prompt Refinement', () => {
+    let originalFetch: any;
+    let originalAlert: any;
+    let originalPrompt: any;
+    let localStorageMock: any;
+    let store: Record<string, string>;
+
+    beforeEach(() => {
+      originalFetch = globalThis.fetch;
+      originalAlert = globalThis.alert;
+      originalPrompt = globalThis.prompt;
+      vi.stubGlobal('alert', vi.fn());
+      vi.stubGlobal('prompt', vi.fn());
+
+      store = {};
+      localStorageMock = {
+        getItem: vi.fn((key: string) => store[key] || null),
+        setItem: vi.fn((key: string, value: string) => { store[key] = value; }),
+        removeItem: vi.fn((key: string) => { delete store[key]; }),
+        clear: vi.fn(() => { store = {}; })
+      };
+      vi.stubGlobal('localStorage', localStorageMock);
+
+      component.newPrompt.set('');
+      component.refining.set(false);
+      component.toastError.set(null);
+    });
+
+    afterEach(() => {
+      globalThis.fetch = originalFetch;
+      globalThis.alert = originalAlert;
+      globalThis.prompt = originalPrompt;
+      vi.unstubAllGlobals();
+    });
+
+    it('should do nothing if raw prompt is empty', async () => {
+      const fetchSpy = vi.fn();
+      vi.stubGlobal('fetch', fetchSpy);
+
+      await component.refinePrompt();
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(component.refining()).toBe(false);
+    });
+
+    it('should trigger warning and alert if GOOGLE_API_KEY is not in localStorage', async () => {
+      component.newPrompt.set('implement a order module');
+
+      const alertSpy = vi.fn();
+      vi.stubGlobal('alert', alertSpy);
+
+      const promptSpy = vi.fn(() => 'new-secret-key');
+      vi.stubGlobal('prompt', promptSpy);
+
+      await component.refinePrompt();
+
+      expect(alertSpy).toHaveBeenCalledWith('Enter valid Google API key to use this function');
+      expect(component.toastError()).toBe('Enter valid Google API key to use this function');
+      expect(promptSpy).toHaveBeenCalled();
+    });
+
+    it('should set refined prompt on successful Gemini API fetch', async () => {
+      localStorage.setItem('GOOGLE_API_KEY', 'valid-api-key-123');
+      component.newPrompt.set('basic task');
+
+      const mockResponse = {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: 'Highly detailed professional copywriter prompt here'
+                }
+              ]
+            }
+          }
+        ]
+      };
+
+      const fetchSpy = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse
+      });
+      vi.stubGlobal('fetch', fetchSpy);
+
+      await component.refinePrompt();
+
+      expect(fetchSpy).toHaveBeenCalled();
+      const fetchArgs = fetchSpy.mock.calls[0];
+      expect(fetchArgs[0]).toContain('gemini-2.5-flash');
+      expect(fetchArgs[0]).toContain('key=valid-api-key-123');
+      expect(JSON.parse(fetchArgs[1].body)).toEqual({
+        contents: [
+          {
+            parts: [
+              {
+                text: 'You are an expert developer. Your task is to redefine and technically and professionaly structure the next promt:\n\n"basic task"\n\nReturn only the redefined promt Without any other conclusions or extra text in the language in which user asked.'
+              }
+            ]
+          }
+        ]
+      });
+
+      expect(component.newPrompt()).toBe('Highly detailed professional copywriter prompt here');
+      expect(component.refining()).toBe(false);
+      expect(component.toastError()).toBeNull();
+    });
+
+    it('should handle API fetch error and show toast', async () => {
+      localStorage.setItem('GOOGLE_API_KEY', 'valid-api-key-123');
+      component.newPrompt.set('basic task');
+
+      const fetchSpy = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        statusText: 'Bad Request',
+        json: async () => ({ error: { message: 'Quota exceeded or invalid key' } })
+      });
+      vi.stubGlobal('fetch', fetchSpy);
+
+      await component.refinePrompt();
+
+      expect(component.refining()).toBe(false);
+      expect(component.toastError()).toBe('Quota exceeded or invalid key');
+      expect(component.newPrompt()).toBe('basic task');
     });
   });
 });

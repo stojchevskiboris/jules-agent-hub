@@ -1,0 +1,30 @@
+
+> jules-agent-hub@0.0.0 start
+> ng serve
+
+❯ Building...
+✔ Building...
+Initial chunk files | Names         |  Raw size
+main.js             | main          | 303.30 kB |
+styles.css          | styles        |   2.47 kB |
+
+                    | Initial total | 305.78 kB
+
+Application bundle generation complete. [8.079 seconds] - 2026-07-14T21:18:14.357Z
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. Find more at https://v21.angular.dev/extended-diagnostics/NG8107[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/components/workspace/workspace.component.html:293:81:
+[37m      293 │ ...seDiff(artifact.changeSet?.[32mgitPatch[37m?.unidiffPatch); trackBy: t...
+          ╵                               [32m~~~~~~~~[0m
+
+  Warning occurs in the template of component WorkspaceComponent.
+
+    src/app/components/workspace/workspace.component.ts:22:15:
+[37m      22 │   templateUrl: [32m'./workspace.component.html'[37m,
+         ╵                [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://localhost:4200/
