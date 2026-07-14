@@ -34,6 +34,10 @@
     font-size: 1.25rem;
     color: #f0f6fc;
     margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     @media (min-width: 768px) {
       font-size: 1.5rem;
@@ -89,13 +93,41 @@
   }
 }
 
+.mobile-tabs {
+  display: flex;
+  border-bottom: 1px solid #30363d;
+  margin-bottom: 1rem;
+
+  @media (min-width: 1024px) {
+    display: none;
+  }
+
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #8b949e;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+
+    &.active {
+      color: #f0f6fc;
+      border-bottom-color: #f78166;
+    }
+  }
+}
+
 .board-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem;
 
   @media (min-width: 1024px) {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 2rem;
   }
 }
@@ -109,9 +141,21 @@
   height: auto;
   max-height: 600px;
 
+  &.mobile-hidden {
+    @media (max-width: 1023px) {
+      display: none;
+    }
+  }
+
   @media (min-width: 768px) {
     height: calc(100vh - 12rem);
     max-height: none;
+  }
+
+  @media (min-width: 1024px) {
+    &.mobile-hidden {
+      display: flex;
+    }
   }
 
   .column-header {
@@ -145,15 +189,16 @@
 .task-card {
   background-color: #0d1117;
   border: 1px solid #30363d;
-  border-radius: 6px;
-  padding: 1rem;
+  border-radius: 8px;
+  padding: 1.25rem;
   margin-bottom: 1rem;
   cursor: pointer;
-  transition: transform 0.1s, border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 
   &:hover {
-    border-color: #58a6ff;
+    border-color: #8b949e;
     background-color: #161b22;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 
   &.completed {
@@ -168,13 +213,20 @@
 
     .header-main {
       display: flex;
-      justify-content: space-between;
+      flex-wrap: wrap;
+      justify-content: flex-start;
       align-items: center;
       gap: 0.5rem;
+      margin-bottom: 0.25rem;
+
+      .task-id {
+        margin-right: auto;
+      }
     }
 
     .header-time {
       display: flex;
+      flex-wrap: wrap;
       gap: 0.75rem;
       font-size: 0.7rem;
       color: #8b949e;
@@ -205,19 +257,26 @@
   }
 
   .task-title {
-    margin: 0 0 0.5rem 0;
-    font-size: 0.95rem;
+    margin: 0 0 0.75rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
     color: #f0f6fc;
+    line-height: 1.4;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 
   .task-instruction {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: #8b949e;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    line-height: 1.5;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 
   .task-meta {
@@ -236,6 +295,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0;
 
     .task-source {
       font-size: 0.7rem;
@@ -244,6 +304,8 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      flex: 1;
+      min-width: 0;
     }
 
     .btn-open {
