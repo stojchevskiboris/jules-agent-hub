@@ -119,6 +119,12 @@
             <span class="btn-open">Details</span>
           </div>
         </div>
+
+        <div *ngIf="nextPageToken()" class="load-more-container">
+          <button (click)="loadMoreSessions()" class="load-more-btn" [disabled]="loadingMore()">
+            {{ loadingMore() ? 'Loading...' : 'Load More' }}
+          </button>
+        </div>
       </div>
     </section>
   </div>

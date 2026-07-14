@@ -5,12 +5,12 @@
 ❯ Building...
 ✔ Building...
 Initial chunk files | Names         |  Raw size
-main.js             | main          | 303.30 kB |
+main.js             | main          | 306.81 kB |
 styles.css          | styles        |   2.47 kB |
 
-                    | Initial total | 305.78 kB
+                    | Initial total | 309.29 kB
 
-Application bundle generation complete. [8.079 seconds] - 2026-07-14T21:18:14.357Z
+Application bundle generation complete. [7.215 seconds] - 2026-07-14T21:56:53.481Z
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. Find more at https://v21.angular.dev/extended-diagnostics/NG8107[0m [1m[35m[plugin angular-compiler][0m
 
