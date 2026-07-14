@@ -42,6 +42,9 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
   chatMessage = signal<string>('');
   isSendingMessage = signal<boolean>(false);
 
+  refining = signal<boolean>(false);
+  toastError = signal<string | null>(null);
+
   loading = signal<boolean>(false);
   showScrollButton = signal<boolean>(false);
   hasNewMessages = signal<boolean>(false);
@@ -401,6 +404,100 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
 
   setAutomationMode(checked: boolean) {
     this.automationMode.set(checked ? AutomationMode.AUTO_CREATE_PR : AutomationMode.AUTOMATION_MODE_UNSPECIFIED);
+  }
+
+  setGoogleApiKey() {
+    const key = prompt('Enter your Google API Key:');
+    if (key !== null) {
+      if (key.trim()) {
+        localStorage.setItem('GOOGLE_API_KEY', key.trim());
+      } else {
+        localStorage.removeItem('GOOGLE_API_KEY');
+      }
+    }
+  }
+
+  async refinePrompt() {
+    const rawInput = this.newPrompt();
+    if (!rawInput) return;
+
+    let apiKey = '';
+    try {
+      apiKey = localStorage.getItem('GOOGLE_API_KEY') || '';
+    } catch (e) {
+      console.error('Failed to access localStorage', e);
+    }
+
+    if (!apiKey) {
+      const msg = 'Enter valid Google API key to use this function';
+      this.showToast(msg);
+      alert(msg);
+      this.setGoogleApiKey();
+      return;
+    }
+
+    this.refining.set(true);
+    this.clearToast();
+
+    try {
+      const promptText = `You are an expert developer. Your task is to redefine and technically and professionaly structure the next promt:\n\n"${rawInput}"\n\nReturn only the redefined promt Without any other conclusions or extra text in the language in which user asked.`;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: promptText
+                }
+              ]
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        let errText = '';
+        try {
+          const errData = await response.json();
+          errText = errData?.error?.message || response.statusText;
+        } catch {
+          errText = response.statusText;
+        }
+        throw new Error(errText || `API error (status ${response.status})`);
+      }
+
+      const data = await response.json();
+      const refinedText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (refinedText) {
+        this.newPrompt.set(refinedText.trim());
+      } else {
+        throw new Error('Invalid response format from Gemini API.');
+      }
+    } catch (error: any) {
+      console.error('Gemini refinement failed:', error);
+      this.showToast(error?.message || 'Refinement failed due to an error.');
+    } finally {
+      this.refining.set(false);
+    }
+  }
+
+  clearToast() {
+    this.toastError.set(null);
+  }
+
+  showToast(message: string) {
+    this.toastError.set(message);
+    setTimeout(() => {
+      if (this.toastError() === message) {
+        this.toastError.set(null);
+      }
+    }, 5000);
   }
 
   truncateTitle(title: string | undefined, maxLength: number = 80): string {
