@@ -62,23 +62,15 @@ describe('DashboardLayoutComponent (unit tests)', () => {
     expect(component.sessionNextPageToken()).toBeNull();
   });
 
-  it('should initialize accordions as expanded', () => {
-    expect(component.sessionsExpanded()).toBe(true);
-    expect(component.sourcesExpanded()).toBe(true);
+  it('should initialize activeTab as sessions', () => {
+    expect(component.activeTab()).toBe('sessions');
   });
 
-  it('should toggle sessions accordion', () => {
-    component.toggleSessions();
-    expect(component.sessionsExpanded()).toBe(false);
-    component.toggleSessions();
-    expect(component.sessionsExpanded()).toBe(true);
-  });
-
-  it('should toggle sources accordion', () => {
-    component.toggleSources();
-    expect(component.sourcesExpanded()).toBe(false);
-    component.toggleSources();
-    expect(component.sourcesExpanded()).toBe(true);
+  it('should change active tab', () => {
+    component.setActiveTab('sources');
+    expect(component.activeTab()).toBe('sources');
+    component.setActiveTab('sessions');
+    expect(component.activeTab()).toBe('sessions');
   });
 
   describe('loadSessions', () => {

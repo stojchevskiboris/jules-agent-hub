@@ -31,48 +31,51 @@
       </a>
     </nav>
 
-    <div class="sessions-section" [class.expanded]="sessionsExpanded()">
-      <h3 (click)="toggleSessions()">
-        Recent Sessions
-        <span class="arrow">{{ sessionsExpanded() ? '▼' : '▶' }}</span>
-      </h3>
-      <div class="section-content" *ngIf="sessionsExpanded()">
-        <ul class="sessions-list">
-          <li *ngFor="let session of sessions()" (click)="selectSession(session)" class="session-item"
-              [class.active]="currentSessionId() === session.name">
-            <span class="session-name">
-              <span class="name-text">
-                {{ truncateTitle(session.title || getShortName(session.name), 30) }}
-                <span *ngIf="isAwaitingFeedback(session)">🧙‍♂️</span>
-              </span>
-              <span class="status-dot" [class]="getStateUI(session.state).class" [title]="getStateUI(session.state).description"></span>
-              <span *ngIf="getPullRequest(session)?.merged === false" class="unmerged-icon" title="PR is not merged">🧩</span>
-              <span *ngIf="getPullRequest(session)?.merged && session.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
-            </span>
-          </li>
-        </ul>
-        <div *ngIf="sessionNextPageToken()" class="load-more-container">
-          <button (click)="loadMoreSessions()" class="load-more-btn" [disabled]="loadingMoreSessions()">
-            {{ loadingMoreSessions() ? 'Loading...' : 'Load More' }}
-          </button>
-        </div>
+    <div class="sidebar-tabs-container">
+      <div class="tabs-header">
+        <button class="tab-btn" [class.active]="activeTab() === 'sessions'" (click)="setActiveTab('sessions')">
+          Recent Sessions
+        </button>
+        <button class="tab-btn" [class.active]="activeTab() === 'sources'" (click)="setActiveTab('sources')">
+          Repositories
+        </button>
       </div>
-    </div>
 
-    <div class="sources-section" [class.expanded]="sourcesExpanded()">
-      <h3 (click)="toggleSources()">
-        Repositories
-        <span class="arrow">{{ sourcesExpanded() ? '▼' : '▶' }}</span>
-      </h3>
-      <div class="section-content" *ngIf="sourcesExpanded()">
-        <div *ngIf="loading()" class="loader">Loading...</div>
-        <div *ngIf="error() && error() !== API_KEY_ERROR" class="error">{{ error() }}</div>
-        <ul class="sources-list">
-          <li *ngFor="let source of sources()" (click)="selectSource(source)" class="source-item"
-              [class.active]="activeSource() === source.name">
-            <span class="source-name">{{ source.githubRepo.repo || source.name }}</span>
-          </li>
-        </ul>
+      <div class="tab-content">
+        <!-- Sessions Tab Panel -->
+        <div class="tab-panel scrollable-panel" *ngIf="activeTab() === 'sessions'">
+          <ul class="sessions-list">
+            <li *ngFor="let session of sessions()" (click)="selectSession(session)" class="session-item"
+                [class.active]="currentSessionId() === session.name">
+              <span class="session-name">
+                <span class="name-text">
+                  {{ truncateTitle(session.title || getShortName(session.name), 30) }}
+                  <span *ngIf="isAwaitingFeedback(session)">🧙‍♂️</span>
+                </span>
+                <span class="status-dot" [class]="getStateUI(session.state).class" [title]="getStateUI(session.state).description"></span>
+                <span *ngIf="getPullRequest(session)?.merged === false" class="unmerged-icon" title="PR is not merged">🧩</span>
+                <span *ngIf="getPullRequest(session)?.merged && session.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
+              </span>
+            </li>
+          </ul>
+          <div *ngIf="sessionNextPageToken()" class="load-more-container">
+            <button (click)="loadMoreSessions()" class="load-more-btn" [disabled]="loadingMoreSessions()">
+              {{ loadingMoreSessions() ? 'Loading...' : 'Load More' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Sources Tab Panel -->
+        <div class="tab-panel scrollable-panel" *ngIf="activeTab() === 'sources'">
+          <div *ngIf="loading()" class="loader">Loading...</div>
+          <div *ngIf="error() && error() !== API_KEY_ERROR" class="error">{{ error() }}</div>
+          <ul class="sources-list">
+            <li *ngFor="let source of sources()" (click)="selectSource(source)" class="source-item"
+                [class.active]="activeSource() === source.name">
+              <span class="source-name">{{ source.githubRepo.repo || source.name }}</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </aside>

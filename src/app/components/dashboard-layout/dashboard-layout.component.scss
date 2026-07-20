@@ -91,11 +91,11 @@
   display: flex;
   flex-direction: column;
   padding: 1rem;
-  overflow-y: auto;
+  overflow: hidden;
   position: fixed;
   top: 0;
   left: -280px;
-  height: 100vh;
+  height: 100dvh;
   z-index: 999;
   transition: left 0.3s ease-in-out;
 
@@ -106,7 +106,7 @@
   @media (min-width: 768px) {
     position: static;
     left: 0;
-    height: auto;
+    height: 100dvh;
   }
 
   .sidebar-header {
@@ -167,38 +167,54 @@
     }
   }
 
-  .sessions-section, .sources-section {
-    margin-bottom: 1rem;
+  .sidebar-tabs-container {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-height: 0;
 
-    h3 {
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      color: #8b949e;
-      margin-bottom: 0.5rem;
-      padding: 0.5rem 0.75rem;
-      cursor: pointer;
+    .tabs-header {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-radius: 6px;
-      transition: background-color 0.2s, color 0.2s;
+      border-bottom: 1px solid #30363d;
+      margin-bottom: 1rem;
+      gap: 4px;
 
-      &:hover {
-        background-color: #21262d;
-        color: #f0f6fc;
-      }
+      .tab-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        color: #8b949e;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: color 0.2s, border-color 0.2s;
+        text-align: center;
+        white-space: nowrap;
 
-      .arrow {
-        font-size: 0.7rem;
-        color: #484f58;
+        &:hover {
+          color: #c9d1d9;
+        }
+
+        &.active {
+          color: #f0f6fc;
+          border-bottom-color: #f78166;
+        }
       }
     }
 
-    .section-content {
-      max-height: 90dvh;
+    .tab-content {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scrollable-panel {
+      flex: 1;
       overflow-y: auto;
+      max-height: calc(100dvh - 220px);
       padding-right: 4px;
 
       &::-webkit-scrollbar {
