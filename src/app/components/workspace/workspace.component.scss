@@ -180,7 +180,23 @@
         }
       }
     }
-    .source-info { font-size: 0.7rem; color: #8b949e; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .source-info {
+      font-size: 0.7rem;
+      color: #8b949e;
+      font-family: monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      a {
+        color: #58a6ff;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
   }
 
   .workspace-layout {
