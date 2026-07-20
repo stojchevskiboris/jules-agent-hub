@@ -549,4 +549,151 @@ describe('WorkspaceComponent (unit tests)', () => {
       expect(component.newPrompt()).toBe('basic task');
     });
   });
+
+  describe('Contextual Knowledge Upload & Integration', () => {
+    beforeEach(() => {
+      // Mock sessionStorage globally
+      const store: Record<string, string> = {};
+      const sessionStorageMock = {
+        getItem: vi.fn((key: string) => store[key] || null),
+        setItem: vi.fn((key: string, val: string) => { store[key] = val; }),
+        removeItem: vi.fn((key: string) => { delete store[key]; }),
+        clear: vi.fn(() => { for (const k in store) delete store[k]; })
+      };
+      vi.stubGlobal('sessionStorage', sessionStorageMock);
+
+      // Mock FileReader globally if not defined
+      if (typeof (globalThis as any).FileReader === 'undefined') {
+        (globalThis as any).FileReader = class {
+          onload: any;
+          readAsText(file: any) {
+            setTimeout(() => {
+              if (this.onload) {
+                this.onload({ target: { result: 'real text content' } });
+              }
+            }, 0);
+          }
+        };
+      }
+    });
+
+    it('should validate allowed file formats', () => {
+      const allowedFile = new File([''], 'test.pdf');
+      const disallowedFile = new File([''], 'test.exe');
+
+      expect(component.isValidFormat(allowedFile)).toBe(true);
+      expect(component.isValidFormat(disallowedFile)).toBe(false);
+    });
+
+    it('should enforce 5MB size limit', async () => {
+      const largeFile = {
+        name: 'test.pdf',
+        size: 6 * 1024 * 1024, // 6MB
+        type: 'application/pdf'
+      } as any;
+
+      const toastSpy = vi.spyOn(component, 'showToast');
+      await component.uploadFiles([largeFile]);
+
+      expect(toastSpy).toHaveBeenCalledWith(expect.stringContaining('File too large'));
+      expect(component.uploadedFiles().length).toBe(0);
+    });
+
+    it('should generate mock extracted content for binary files', () => {
+      const pdfFile = new File([''], 'schema.pdf');
+      const docxFile = new File([''], 'guidelines.docx');
+      const csvFile = new File([''], 'data.xlsx');
+      const imgFile = new File([''], 'image.png');
+
+      const pdfData = component.generateMockExtractedContent(pdfFile);
+      expect(pdfData.text).toContain('[EXTRACTED PDF DOCUMENT - schema.pdf');
+      expect(pdfData.summary).toContain('PDF manual');
+
+      const docxData = component.generateMockExtractedContent(docxFile);
+      expect(docxData.text).toContain('[EXTRACTED WORD DOCUMENT - guidelines.docx]');
+      expect(docxData.summary).toContain('Word document');
+
+      const csvData = component.generateMockExtractedContent(csvFile);
+      expect(csvData.text).toContain('[EXTRACTED SPREADSHEET DATA - data.xlsx]');
+      expect(csvData.summary).toContain('spreadsheet');
+
+      const imgData = component.generateMockExtractedContent(imgFile);
+      expect(imgData.text).toContain('[OCR IMAGE CHARACTER RECOGNITION - image.png]');
+      expect(imgData.summary).toContain('OCR scan');
+    });
+
+    it('should extract plain text using FileReader', async () => {
+      const txtFile = new File(['real text content'], 'doc.txt', { type: 'text/plain' });
+      const text = await component.extractTextContent(txtFile);
+      expect(text).toBe('real text content');
+    });
+
+    it('should support toggling sidebar and modal details', () => {
+      expect(component.knowledgeSidebarOpen()).toBe(false);
+      component.toggleKnowledgeSidebar();
+      expect(component.knowledgeSidebarOpen()).toBe(true);
+
+      const file: any = { id: 'file-1', name: 'test.txt', chunks: [] };
+      component.viewFileDetails(file);
+      expect(component.viewingFileDetails()).toBe(file);
+
+      component.closeFileDetails();
+      expect(component.viewingFileDetails()).toBeNull();
+    });
+
+    it('should append integrated files to prompt when initiating task', () => {
+      const file: any = {
+        id: 'file-123',
+        name: 'api.txt',
+        size: 1024,
+        type: 'text/plain',
+        status: 'INTEGRATED',
+        extractedText: 'endpoint /v1/test',
+        summary: 'parsed API'
+      };
+
+      component.uploadedFiles.set([file]);
+      component.newPrompt.set('Fetch users');
+      component.selectedSource.set('sources/test-repo');
+
+      (component as any).apiService.createSession = vi.fn().mockReturnValue(of({ name: 'session-123' }));
+      const apiSpy = vi.spyOn((component as any).apiService, 'createSession');
+      (component as any).router.navigate = vi.fn();
+      component.createSession();
+
+      expect(apiSpy).toHaveBeenCalled();
+      const promptArg = apiSpy.mock.calls[0][1];
+      expect(promptArg).toContain('Fetch users');
+      expect(promptArg).toContain('CONTEXTUAL KNOWLEDGE BASE');
+      expect(promptArg).toContain('api.txt');
+      expect(promptArg).toContain('endpoint /v1/test');
+    });
+
+    it('should send background message and show system activity when file is integrated in active session', () => {
+      component.activeSessionId.set('sessions/session-456');
+
+      const file: any = {
+        id: 'file-123',
+        name: 'api.txt',
+        size: 1024,
+        type: 'text/plain',
+        status: 'INTEGRATED',
+        extractedText: 'endpoint /v1/test',
+        summary: 'parsed API'
+      };
+
+      component.uploadedFiles.set([file]);
+
+      (component as any).apiService.sendMessage = vi.fn().mockReturnValue(of(undefined));
+      const msgSpy = vi.spyOn((component as any).apiService, 'sendMessage');
+      component.handleFileIntegrated('file-123');
+
+      expect(msgSpy).toHaveBeenCalledWith('sessions/session-456', expect.stringContaining('api.txt'));
+
+      // Should show synthetic system activity
+      const lastActivity = component.activities()[component.activities().length - 1];
+      expect(lastActivity.originator).toBe('system');
+      expect(lastActivity.description).toContain('api.txt');
+    });
+  });
 });
