@@ -78,7 +78,13 @@
         </div>
       </div>
       <div class="source-info">
-        Source: {{ session()?.sourceContext?.source }}
+        Source:
+        <ng-container *ngIf="getSourceUrl(session()?.sourceContext?.source) as url; else noUrl">
+          <a [href]="url" target="_blank" rel="noopener noreferrer">{{ session()?.sourceContext?.source }}</a>
+        </ng-container>
+        <ng-template #noUrl>
+          {{ session()?.sourceContext?.source }}
+        </ng-template>
       </div>
     </header>
 

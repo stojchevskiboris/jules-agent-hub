@@ -397,6 +397,32 @@ describe('WorkspaceComponent (unit tests)', () => {
     });
   });
 
+  describe('getSourceUrl', () => {
+    it('should return null for null, undefined, or empty string', () => {
+      expect(component.getSourceUrl(null)).toBeNull();
+      expect(component.getSourceUrl(undefined)).toBeNull();
+      expect(component.getSourceUrl('')).toBeNull();
+      expect(component.getSourceUrl('   ')).toBeNull();
+    });
+
+    it('should strip sources/ prefix', () => {
+      expect(component.getSourceUrl('sources/github.com/google/guava')).toBe('https://github.com/google/guava');
+    });
+
+    it('should keep existing http or https protocol', () => {
+      expect(component.getSourceUrl('https://github.com/google/guava')).toBe('https://github.com/google/guava');
+      expect(component.getSourceUrl('http://github.com/google/guava')).toBe('http://github.com/google/guava');
+    });
+
+    it('should prefix https to github.com/ references', () => {
+      expect(component.getSourceUrl('github.com/google/guava')).toBe('https://github.com/google/guava');
+    });
+
+    it('should prefix github.com for owner/repo formats', () => {
+      expect(component.getSourceUrl('google/guava')).toBe('https://github.com/google/guava');
+    });
+  });
+
   describe('In-Place Prompt Refinement', () => {
     let originalFetch: any;
     let originalAlert: any;

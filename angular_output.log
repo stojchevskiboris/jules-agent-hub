@@ -5,17 +5,17 @@
 ❯ Building...
 ✔ Building...
 Initial chunk files | Names         |  Raw size
-main.js             | main          | 301.61 kB |
+main.js             | main          | 304.51 kB |
 styles.css          | styles        |   2.47 kB |
 
-                    | Initial total | 304.09 kB
+                    | Initial total | 306.98 kB
 
-Application bundle generation complete. [10.149 seconds] - 2026-07-20T05:27:09.811Z
+Application bundle generation complete. [7.080 seconds] - 2026-07-20T20:32:46.159Z
 
 [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mNG8107: NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. Find more at https://v21.angular.dev/extended-diagnostics/NG8107[0m [1m[35m[plugin angular-compiler][0m
 
-    src/app/components/workspace/workspace.component.html:293:81:
-[37m      293 │ ...seDiff(artifact.changeSet?.[32mgitPatch[37m?.unidiffPatch); trackBy: t...
+    src/app/components/workspace/workspace.component.html:299:81:
+[37m      299 │ ...seDiff(artifact.changeSet?.[32mgitPatch[37m?.unidiffPatch); trackBy: t...
           ╵                               [32m~~~~~~~~[0m
 
   Warning occurs in the template of component WorkspaceComponent.

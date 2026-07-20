@@ -698,4 +698,23 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
     return files;
   }
 
+  getSourceUrl(source: string | undefined | null): string | null {
+    if (!source) return null;
+    let clean = source.trim();
+    if (!clean) return null;
+    if (clean.startsWith('sources/')) {
+      clean = clean.substring('sources/'.length);
+    }
+    if (clean.startsWith('https://') || clean.startsWith('http://')) {
+      return clean;
+    }
+    if (clean.startsWith('github.com/')) {
+      return `https://${clean}`;
+    }
+    if (clean.includes('/')) {
+      return `https://github.com/${clean}`;
+    }
+    return `https://github.com/${clean}`;
+  }
+
 }
