@@ -29,6 +29,75 @@
         <textarea [(ngModel)]="newPrompt" placeholder="e.g., Fix the bug in the login component..." rows="5"></textarea>
       </div>
 
+      <!-- Contextual Knowledge Upload (Task Initiation) -->
+      <div class="form-group knowledge-upload-section">
+        <div class="section-header">
+          <label>📚 Contextual Knowledge Base (Optional)</label>
+        </div>
+        <p class="section-desc">Enrich Jules's understanding of this task by uploading external documentation or specifications.</p>
+
+        <div class="upload-dropzone"
+             (dragover)="onDragOver($event)"
+             (drop)="onFileDropped($event)"
+             (click)="fileInputInit.click()">
+          <span class="upload-icon">📤</span>
+          <span class="upload-text">Drag & drop files here or <strong>click to browse</strong></span>
+          <span class="upload-subtext">Supports PDF, DOCX, XLSX, HTML, TXT, MD, CSV, JSON, XML & Images (JPEG, PNG, GIF, SVG)</span>
+          <input type="file" multiple (change)="onFilesSelected($event)" style="display: none" #fileInputInit>
+        </div>
+
+        <div *ngIf="uploadedFiles().length > 0" class="uploaded-files-container">
+          <h4>Uploaded Knowledge Documents ({{ uploadedFiles().length }})</h4>
+          <div class="files-grid">
+            <div *ngFor="let file of uploadedFiles()" class="file-card" [class]="file.status.toLowerCase()">
+              <div class="file-main-info">
+                <span class="file-emoji" [ngSwitch]="file.name.split('.').pop()?.toLowerCase()">
+                  <span *ngSwitchCase="'pdf'">📄</span>
+                  <span *ngSwitchCase="'docx'">📄</span>
+                  <span *ngSwitchCase="'xlsx'">📊</span>
+                  <span *ngSwitchCase="'csv'">📊</span>
+                  <span *ngSwitchCase="'json'">⚙️</span>
+                  <span *ngSwitchCase="'xml'">⚙️</span>
+                  <span *ngSwitchCase="'html'">⚙️</span>
+                  <span *ngSwitchCase="'jpg'">🖼️</span>
+                  <span *ngSwitchCase="'jpeg'">🖼️</span>
+                  <span *ngSwitchCase="'png'">🖼️</span>
+                  <span *ngSwitchCase="'gif'">🖼️</span>
+                  <span *ngSwitchCase="'svg'">🖼️</span>
+                  <span *ngSwitchDefault>📄</span>
+                </span>
+                <div class="file-meta">
+                  <span class="file-name" [title]="file.name">{{ file.name }}</span>
+                  <span class="file-size">{{ (file.size / 1024).toFixed(1) }} KB</span>
+                </div>
+              </div>
+
+              <!-- Progress / Status bar -->
+              <div class="file-status-section">
+                <div class="progress-bar-container" *ngIf="file.status !== 'INTEGRATED' && file.status !== 'FAILED'">
+                  <div class="progress-bar" [style.width.%]="file.progress"></div>
+                </div>
+                <div class="status-row">
+                  <span class="status-badge-inline" [class]="file.status.toLowerCase()">
+                    <span *ngIf="file.status === 'PENDING'">Queued</span>
+                    <span *ngIf="file.status === 'EXTRACTING'">Extracting...</span>
+                    <span *ngIf="file.status === 'CHUNKING'">Chunking...</span>
+                    <span *ngIf="file.status === 'VECTORIZING'">Indexing...</span>
+                    <span *ngIf="file.status === 'INTEGRATED'">Ready ✅</span>
+                    <span *ngIf="file.status === 'FAILED'">Failed ❌</span>
+                  </span>
+                  <div class="file-actions">
+                    <button class="btn-action-view" (click)="viewFileDetails(file); $event.stopPropagation()" title="View parsed text & chunks">🔍 Details</button>
+                    <button class="btn-action-delete" (click)="removeFile(file.id); $event.stopPropagation()" title="Delete file">🗑️</button>
+                  </div>
+                </div>
+                <p *ngIf="file.error" class="file-error-msg">{{ file.error }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="form-options">
         <label class="toggle">
           <input type="checkbox" [checked]="automationMode() === 'AUTO_CREATE_PR'"
@@ -71,6 +140,10 @@
           <span class="time-item">Worked for: {{ getWorkedFor() }}</span>
         </div>
 
+        <button class="btn-knowledge-toggle" (click)="toggleKnowledgeSidebar()" title="Toggle Contextual Knowledge Base" [class.active]="knowledgeSidebarOpen()">
+          📚 Knowledge Base <span class="badge-count" *ngIf="uploadedFiles().length > 0">{{ uploadedFiles().length }}</span>
+        </button>
+
         <div class="pr-link-wrapper" *ngIf="getPullRequest() as pr">
           <span *ngIf="pr.merged === false" class="unmerged-icon" title="PR is not merged">🧩</span>
           <span *ngIf="pr.merged && session()?.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
@@ -89,11 +162,13 @@
     </header>
 
     <div class="workspace-layout">
-      <!-- Activity Timeline -->
-      <div class="feed-wrapper">
-        <div class="activity-feed" #scrollContainer (scroll)="onScroll()">
-          <div *ngFor="let activity of activities(); trackBy: trackByActivityId" class="activity-item"
-            [class.user-msg]="activity.originator === 'user'" [class.agent-msg]="activity.originator !== 'user'">
+      <!-- Left side: Main workspace feed and actions -->
+      <div class="workspace-main-panel">
+        <!-- Activity Timeline -->
+        <div class="feed-wrapper">
+          <div class="activity-feed" #scrollContainer (scroll)="onScroll()">
+            <div *ngFor="let activity of activities(); trackBy: trackByActivityId" class="activity-item"
+              [class.user-msg]="activity.originator === 'user'" [class.agent-msg]="activity.originator !== 'user'">
             <div class="activity-meta">
               <span class="author">
                 <ng-container [ngSwitch]="activity.originator">
@@ -323,38 +398,147 @@
             </div>
           </div>
 
-          <div *ngIf="activities().length === 0" class="no-activity">
-            Initializing session...
+            <div *ngIf="activities().length === 0" class="no-activity">
+              Initializing session...
+            </div>
+          </div>
+
+          <button *ngIf="showScrollButton()"
+            class="btn-scroll-bottom"
+            [class.has-new]="hasNewMessages()"
+            (click)="scrollToBottom()">
+            {{ hasNewMessages() ? 'New Messages' : 'Scroll to Bottom' }}
+          </button>
+        </div>
+
+        <div *ngIf="isAwaitingApproval()" class="approval-bar">
+          <p>A plan has been generated and is awaiting your approval.</p>
+          <button class="btn-approve" (click)="approvePlan()">Approve Plan</button>
+        </div>
+
+        <!-- Chat Input -->
+        <footer class="chat-footer">
+          <div class="chat-input-wrapper">
+            <textarea #chatInput [(ngModel)]="chatMessage"
+              (keydown)="onKeyDown($event)"
+              (input)="adjustHeight(chatInput)"
+              placeholder="Type a message to the agent..."
+              rows="1"></textarea>
+            <button class="btn-send" (click)="sendChatMessage(chatInput)" [disabled]="!chatMessage() || isSendingMessage()">
+              <span *ngIf="isSendingMessage()" class="loader"></span>
+              {{ isSendingMessage() ? '' : 'Send' }}
+            </button>
+          </div>
+        </footer>
+      </div>
+
+      <!-- Right side: Collapsible Task Knowledge Base Sidebar -->
+      <aside class="workspace-sidebar-panel" [class.open]="knowledgeSidebarOpen()">
+        <div class="sidebar-header">
+          <h3>📚 Task Knowledge Base</h3>
+          <button class="btn-close-sidebar" (click)="toggleKnowledgeSidebar()" title="Close Knowledge Base">×</button>
+        </div>
+        <div class="sidebar-body">
+          <p class="sidebar-desc">Enrich Jules's operational context dynamically by uploading reference material, schemas, and specifications.</p>
+
+          <div class="upload-dropzone compact"
+               (dragover)="onDragOver($event)"
+               (drop)="onFileDropped($event)"
+               (click)="fileInputActive.click()">
+            <span class="upload-icon">📤</span>
+            <span class="upload-text">Click to upload files</span>
+            <span class="upload-subtext">PDF, DOCX, XLSX, HTML, TXT, MD, CSV, JSON, XML, Images</span>
+            <input type="file" multiple (change)="onFilesSelected($event)" style="display: none" #fileInputActive>
+          </div>
+
+          <div class="sidebar-files-list">
+            <h4 class="list-heading">Active Knowledge Base ({{ uploadedFiles().length }})</h4>
+            <div *ngIf="uploadedFiles().length === 0" class="sidebar-empty-state">
+              <span class="empty-icon">📂</span>
+              <p>No external knowledge uploaded yet.</p>
+            </div>
+            <div *ngFor="let file of uploadedFiles()" class="sidebar-file-item" [class]="file.status.toLowerCase()">
+              <div class="file-header-row">
+                <span class="file-emoji-inline" [ngSwitch]="file.name.split('.').pop()?.toLowerCase()">
+                  <span *ngSwitchCase="'pdf'">📄</span>
+                  <span *ngSwitchCase="'docx'">📄</span>
+                  <span *ngSwitchCase="'xlsx'">📊</span>
+                  <span *ngSwitchCase="'csv'">📊</span>
+                  <span *ngSwitchCase="'json'">⚙️</span>
+                  <span *ngSwitchCase="'xml'">⚙️</span>
+                  <span *ngSwitchCase="'html'">⚙️</span>
+                  <span *ngSwitchCase="'jpg'">🖼️</span>
+                  <span *ngSwitchCase="'jpeg'">🖼️</span>
+                  <span *ngSwitchCase="'png'">🖼️</span>
+                  <span *ngSwitchCase="'gif'">🖼️</span>
+                  <span *ngSwitchCase="'svg'">🖼️</span>
+                  <span *ngSwitchDefault>📄</span>
+                </span>
+                <span class="file-name-inline" [title]="file.name">{{ file.name }}</span>
+                <button class="btn-remove-inline" (click)="removeFile(file.id)" title="Remove file">×</button>
+              </div>
+              <div class="file-meta-row">
+                <span class="file-size-inline">{{ (file.size / 1024).toFixed(1) }} KB</span>
+                <span class="status-indicator" [class]="file.status.toLowerCase()">
+                  <span *ngIf="file.status === 'PENDING'">Queued</span>
+                  <span *ngIf="file.status === 'EXTRACTING'">Extracting...</span>
+                  <span *ngIf="file.status === 'CHUNKING'">Chunking...</span>
+                  <span *ngIf="file.status === 'VECTORIZING'">Indexing...</span>
+                  <span *ngIf="file.status === 'INTEGRATED'">Ready ✅</span>
+                  <span *ngIf="file.status === 'FAILED'">Failed ❌</span>
+                </span>
+              </div>
+              <div class="progress-bar-container" *ngIf="file.status !== 'INTEGRATED' && file.status !== 'FAILED'">
+                <div class="progress-bar" [style.width.%]="file.progress"></div>
+              </div>
+              <div class="file-actions-row">
+                <button class="btn-sidebar-view" (click)="viewFileDetails(file)">🔍 View Extracted Text</button>
+              </div>
+              <p *ngIf="file.error" class="file-error-msg-sidebar">{{ file.error }}</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- File Details Modal Overlay -->
+  <div class="modal-overlay" *ngIf="viewingFileDetails() as file" (click)="closeFileDetails()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>File Details: {{ file.name }}</h3>
+        <button class="btn-close-modal" (click)="closeFileDetails()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-meta-grid">
+          <div><strong>Type:</strong> {{ file.type }}</div>
+          <div><strong>Size:</strong> {{ (file.size / 1024).toFixed(1) }} KB</div>
+          <div><strong>Status:</strong> <span class="status-badge-inline" [class]="file.status.toLowerCase()">{{ file.status }}</span></div>
+          <div><strong>Chunks Count:</strong> {{ file.chunks.length }}</div>
+        </div>
+
+        <div class="modal-section" *ngIf="file.summary">
+          <h4>AI Summary & Structural Analysis</h4>
+          <p class="file-summary-text">{{ file.summary }}</p>
+        </div>
+
+        <div class="modal-section">
+          <h4>Extracted Text Content</h4>
+          <div class="extracted-text-viewer">
+            <pre><code>{{ file.extractedText }}</code></pre>
           </div>
         </div>
 
-        <button *ngIf="showScrollButton()"
-          class="btn-scroll-bottom"
-          [class.has-new]="hasNewMessages()"
-          (click)="scrollToBottom()">
-          {{ hasNewMessages() ? 'New Messages' : 'Scroll to Bottom' }}
-        </button>
-      </div>
-
-      <div *ngIf="isAwaitingApproval()" class="approval-bar">
-        <p>A plan has been generated and is awaiting your approval.</p>
-        <button class="btn-approve" (click)="approvePlan()">Approve Plan</button>
-      </div>
-
-      <!-- Chat Input -->
-      <footer class="chat-footer">
-        <div class="chat-input-wrapper">
-          <textarea #chatInput [(ngModel)]="chatMessage"
-            (keydown)="onKeyDown($event)"
-            (input)="adjustHeight(chatInput)"
-            placeholder="Type a message to the agent..."
-            rows="1"></textarea>
-          <button class="btn-send" (click)="sendChatMessage(chatInput)" [disabled]="!chatMessage() || isSendingMessage()">
-            <span *ngIf="isSendingMessage()" class="loader"></span>
-            {{ isSendingMessage() ? '' : 'Send' }}
-          </button>
+        <div class="modal-section" *ngIf="file.chunks.length > 0">
+          <h4>Document Chunks & Embeddings ({{ file.chunks.length }})</h4>
+          <div class="chunks-list">
+            <div *ngFor="let chunk of file.chunks; let idx = index" class="chunk-item">
+              <span class="chunk-index">Chunk #{{ idx + 1 }}</span>
+              <p class="chunk-text">{{ chunk }}</p>
+            </div>
+          </div>
         </div>
-      </footer>
+      </div>
     </div>
   </div>
 </div>
