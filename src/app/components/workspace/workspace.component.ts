@@ -5,7 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { Subscription, interval, startWith } from 'rxjs';
 import { JulesApiService } from '../../services/jules-api.service';
-import { Session, Activity, AutomationMode, SessionState, getSessionStateUI } from '../../models/jules.models';
+import { Session, Activity, AutomationMode, SessionState, getSessionStateUI, calculateActiveDuration } from '../../models/jules.models';
 
 export interface KnowledgeFile {
   id: string;
@@ -703,21 +703,19 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getElapsed(): string {
-    const startedAt = this.getStartedAt();
-    if (!startedAt) return '0s';
+    const session = this.session();
+    if (!session) return '0s';
 
-    const diff = Math.floor((this.currentTime().getTime() - startedAt.getTime()) / 1000);
-    return this.formatDuration(diff);
+    const activeMs = calculateActiveDuration(session, this.activities(), this.currentTime());
+    return this.formatDuration(Math.floor(activeMs / 1000));
   }
 
   getWorkedFor(): string {
     const session = this.session();
-    if (!session || !session.createTime || !session.updateTime) return '0s';
+    if (!session) return '0s';
 
-    const start = new Date(session.createTime).getTime();
-    const end = new Date(session.updateTime).getTime();
-    const diff = Math.floor((end - start) / 1000);
-    return this.formatDuration(diff);
+    const activeMs = calculateActiveDuration(session, this.activities(), this.currentTime());
+    return this.formatDuration(Math.floor(activeMs / 1000));
   }
 
   private formatDuration(seconds: number): string {
