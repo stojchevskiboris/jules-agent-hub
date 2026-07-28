@@ -423,6 +423,29 @@ describe('WorkspaceComponent (unit tests)', () => {
     });
   });
 
+  describe('getSafeUrl', () => {
+    it('should cache and return the same SafeResourceUrl for the same media object', () => {
+      const mockSanitizer = {
+        bypassSecurityTrustResourceUrl: vi.fn((url: string) => `safe-${url}`)
+      };
+      (component as any).sanitizer = mockSanitizer;
+
+      const media = { mimeType: 'video/webm', data: 'abc' } as any;
+
+      const res1 = component.getSafeUrl(media);
+      const res2 = component.getSafeUrl(media);
+
+      expect(res1).toBe('safe-data:video/webm;base64,abc');
+      expect(res2).toBe('safe-data:video/webm;base64,abc');
+      expect(mockSanitizer.bypassSecurityTrustResourceUrl).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty string if media is null or undefined', () => {
+      expect(component.getSafeUrl(null)).toBe('');
+      expect(component.getSafeUrl(undefined)).toBe('');
+    });
+  });
+
   describe('In-Place Prompt Refinement', () => {
     let originalFetch: any;
     let originalAlert: any;

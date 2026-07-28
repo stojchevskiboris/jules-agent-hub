@@ -5,7 +5,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { Subscription, interval, startWith } from 'rxjs';
 import { JulesApiService } from '../../services/jules-api.service';
-import { Session, Activity, AutomationMode, SessionState, getSessionStateUI, calculateActiveDuration } from '../../models/jules.models';
+import { Session, Activity, AutomationMode, SessionState, getSessionStateUI, calculateActiveDuration, Media } from '../../models/jules.models';
 
 export interface KnowledgeFile {
   id: string;
@@ -833,8 +833,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
     return title.substring(0, maxLength) + '...';
   }
 
-  getSafeUrl(mimeType: string, data: string): SafeResourceUrl {
-    return this.sanitizer.bypassSecurityTrustResourceUrl(`data:${mimeType};base64,${data}`);
+  private readonly safeUrlCache = new WeakMap<Media, SafeResourceUrl>();
+
+  getSafeUrl(media: Media | undefined | null): SafeResourceUrl | string {
+    if (!media) return '';
+    let safeUrl = this.safeUrlCache.get(media);
+    if (!safeUrl) {
+      safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`data:${media.mimeType};base64,${media.data}`);
+      this.safeUrlCache.set(media, safeUrl);
+    }
+    return safeUrl;
   }
 
   trackByActivityId(index: number, activity: Activity): string {
