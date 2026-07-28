@@ -8,7 +8,8 @@ vi.mock('@angular/core', async () => {
   return {
     ...actual,
     inject: vi.fn(() => ({
-      getSessions: vi.fn().mockReturnValue(of({ sessions: [] }))
+      getSessions: vi.fn().mockReturnValue(of({ sessions: [] })),
+      getSessionActivities: vi.fn().mockReturnValue(of({ activities: [] }))
     })),
     signal: vi.fn((initialValue) => {
       let value = initialValue;

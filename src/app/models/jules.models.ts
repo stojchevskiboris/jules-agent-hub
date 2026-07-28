@@ -222,3 +222,58 @@ export interface ListSessionsResponse {
 export interface SendMessageRequest {
   prompt: string;
 }
+
+export function calculateActiveDuration(session: Session, activities: Activity[], currentTime: Date): number {
+  if (!session || !session.createTime) return 0;
+
+  const startTime = new Date(session.createTime).getTime();
+
+  // Sort activities chronologically by createTime
+  const sortedActivities = [...activities].sort((a, b) => {
+    return new Date(a.createTime).getTime() - new Date(b.createTime).getTime();
+  });
+
+  let active = true;
+  let lastActiveTransitionTime = startTime;
+  let totalActiveMs = 0;
+
+  for (const act of sortedActivities) {
+    const actTime = new Date(act.createTime).getTime();
+
+    // Skip activities that occurred before the session's createTime
+    if (actTime < startTime) continue;
+
+    const isStop = act.planGenerated || act.agentMessaged || act.sessionFailed || (act.sessionCompleted !== undefined && act.sessionCompleted !== null);
+    const isStart = act.planApproved || act.userMessaged;
+
+    if (isStop) {
+      if (active) {
+        totalActiveMs += (actTime - lastActiveTransitionTime);
+        active = false;
+      }
+    } else if (isStart) {
+      if (!active) {
+        lastActiveTransitionTime = actTime;
+        active = true;
+      }
+    }
+  }
+
+  if (active) {
+    const state = session.state;
+    const isCurrentlyActive = state === SessionState.IN_PROGRESS || state === SessionState.PLANNING || state === SessionState.QUEUED;
+
+    let endTime = currentTime.getTime();
+    if (!isCurrentlyActive && session.updateTime) {
+      endTime = new Date(session.updateTime).getTime();
+    } else if (!isCurrentlyActive && sortedActivities.length > 0) {
+      endTime = new Date(sortedActivities[sortedActivities.length - 1].createTime).getTime();
+    }
+
+    if (endTime > lastActiveTransitionTime) {
+      totalActiveMs += (endTime - lastActiveTransitionTime);
+    }
+  }
+
+  return Math.max(0, totalActiveMs);
+}

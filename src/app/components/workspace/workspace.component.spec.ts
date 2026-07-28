@@ -1,6 +1,6 @@
 import '@angular/compiler';
 import { WorkspaceComponent } from './workspace.component';
-import { Activity, Session } from '../../models/jules.models';
+import { Activity, Session, calculateActiveDuration } from '../../models/jules.models';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { of } from 'rxjs';
 
@@ -694,6 +694,157 @@ describe('WorkspaceComponent (unit tests)', () => {
       const lastActivity = component.activities()[component.activities().length - 1];
       expect(lastActivity.originator).toBe('system');
       expect(lastActivity.description).toContain('api.txt');
+    });
+  });
+
+  describe('calculateActiveDuration', () => {
+    it('should return 0 if session or createTime is missing', () => {
+      expect(calculateActiveDuration(null as any, [], new Date())).toBe(0);
+      expect(calculateActiveDuration({} as any, [], new Date())).toBe(0);
+    });
+
+    it('should default to total duration if there are no activities', () => {
+      const createTime = new Date('2026-07-28T08:00:00Z');
+      const currentTime = new Date('2026-07-28T08:30:00Z');
+      const session: Session = {
+        name: 'sessions/123',
+        id: '123',
+        prompt: 'test',
+        state: 'IN_PROGRESS',
+        sourceContext: { source: 'test' },
+        createTime: createTime.toISOString()
+      };
+
+      const duration = calculateActiveDuration(session, [], currentTime);
+      // 30 minutes in milliseconds = 30 * 60 * 1000 = 1800000
+      expect(duration).toBe(1800000);
+    });
+
+    it('should exclude inactive gap between planGenerated and planApproved', () => {
+      const createTime = new Date('2026-07-28T08:00:00Z');
+      const planGeneratedTime = new Date('2026-07-28T08:10:00Z'); // active for 10 mins
+      const planApprovedTime = new Date('2026-07-28T08:30:00Z');  // inactive gap of 20 mins
+      const completeTime = new Date('2026-07-28T08:45:00Z');      // active for 15 mins (total active = 25 mins)
+      const currentTime = new Date('2026-07-28T09:00:00Z');
+
+      const session: Session = {
+        name: 'sessions/123',
+        id: '123',
+        prompt: 'test',
+        state: 'COMPLETED',
+        sourceContext: { source: 'test' },
+        createTime: createTime.toISOString(),
+        updateTime: completeTime.toISOString()
+      };
+
+      const activities: Activity[] = [
+        {
+          name: 'activities/1',
+          id: '1',
+          originator: 'agent',
+          description: 'plan generated',
+          createTime: planGeneratedTime.toISOString(),
+          planGenerated: {} as any
+        },
+        {
+          name: 'activities/2',
+          id: '2',
+          originator: 'user',
+          description: 'plan approved',
+          createTime: planApprovedTime.toISOString(),
+          planApproved: {} as any
+        },
+        {
+          name: 'activities/3',
+          id: '3',
+          originator: 'system',
+          description: 'session completed',
+          createTime: completeTime.toISOString(),
+          sessionCompleted: {}
+        }
+      ];
+
+      const duration = calculateActiveDuration(session, activities, currentTime);
+      // 10 mins + 15 mins = 25 minutes = 25 * 60 * 1000 = 1500000
+      expect(duration).toBe(1500000);
+    });
+
+    it('should exclude inactive gap when awaiting user feedback (agentMessaged)', () => {
+      const createTime = new Date('2026-07-28T08:00:00Z');
+      const agentMessagedTime = new Date('2026-07-28T08:15:00Z'); // active for 15 mins
+      const userMessagedTime = new Date('2026-07-28T08:45:00Z');  // inactive gap of 30 mins
+      const currentTime = new Date('2026-07-28T09:00:00Z');       // active for 15 mins (total active = 30 mins)
+
+      const session: Session = {
+        name: 'sessions/123',
+        id: '123',
+        prompt: 'test',
+        state: 'IN_PROGRESS',
+        sourceContext: { source: 'test' },
+        createTime: createTime.toISOString()
+      };
+
+      const activities: Activity[] = [
+        {
+          name: 'activities/1',
+          id: '1',
+          originator: 'agent',
+          description: 'question',
+          createTime: agentMessagedTime.toISOString(),
+          agentMessaged: {} as any
+        },
+        {
+          name: 'activities/2',
+          id: '2',
+          originator: 'user',
+          description: 'answer',
+          createTime: userMessagedTime.toISOString(),
+          userMessaged: {} as any
+        }
+      ];
+
+      const duration = calculateActiveDuration(session, activities, currentTime);
+      // 15 mins + 15 mins = 30 minutes = 1800000
+      expect(duration).toBe(1800000);
+    });
+
+    it('should sort activities chronologically before calculations', () => {
+      const createTime = new Date('2026-07-28T08:00:00Z');
+      const stopTime = new Date('2026-07-28T08:10:00Z');
+      const startTime = new Date('2026-07-28T08:20:00Z');
+      const currentTime = new Date('2026-07-28T08:30:00Z');
+
+      const session: Session = {
+        name: 'sessions/123',
+        id: '123',
+        prompt: 'test',
+        state: 'IN_PROGRESS',
+        sourceContext: { source: 'test' },
+        createTime: createTime.toISOString()
+      };
+
+      const activities: Activity[] = [
+        {
+          name: 'activities/2',
+          id: '2',
+          originator: 'user',
+          description: 'plan approved',
+          createTime: startTime.toISOString(),
+          planApproved: {} as any
+        },
+        {
+          name: 'activities/1',
+          id: '1',
+          originator: 'agent',
+          description: 'plan generated',
+          createTime: stopTime.toISOString(),
+          planGenerated: {} as any
+        }
+      ];
+
+      const duration = calculateActiveDuration(session, activities, currentTime);
+      // 10 mins (00 to 10) + 10 mins (20 to 30) = 20 minutes = 1200000
+      expect(duration).toBe(1200000);
     });
   });
 });

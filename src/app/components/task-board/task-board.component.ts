@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { JulesApiService } from '../../services/jules-api.service';
-import { Session, SessionState, getSessionStateUI } from '../../models/jules.models';
+import { Session, SessionState, getSessionStateUI, Activity, calculateActiveDuration } from '../../models/jules.models';
 
 @Component({
   selector: 'app-task-board',
@@ -15,6 +15,7 @@ export class TaskBoardComponent implements OnInit, OnDestroy {
   private readonly apiService = inject(JulesApiService);
 
   sessions = signal<Session[]>([]);
+  sessionActivities = signal<Record<string, Activity[]>>({});
   nextPageToken = signal<string | null>(null);
   loading = signal<boolean>(true);
   loadingMore = signal<boolean>(false);
@@ -85,12 +86,27 @@ export class TaskBoardComponent implements OnInit, OnDestroy {
           this.loading.set(false);
         }
         this.nextPageToken.set(res.nextPageToken || null);
+
+        // Fetch activities for each session
+        newSessions.forEach(session => this.fetchActivitiesForSession(session));
       },
       error: (err) => {
         this.loading.set(false);
         this.loadingMore.set(false);
         console.error(err);
       }
+    });
+  }
+
+  fetchActivitiesForSession(session: Session) {
+    this.apiService.getSessionActivities(session.name).subscribe({
+      next: (res) => {
+        this.sessionActivities.update(curr => ({
+          ...curr,
+          [session.name]: res.activities || []
+        }));
+      },
+      error: (err) => console.error(`Failed to load activities for ${session.name}`, err)
     });
   }
 
@@ -135,20 +151,15 @@ export class TaskBoardComponent implements OnInit, OnDestroy {
   }
 
   getElapsed(task: Session): string {
-    const startedAt = this.getStartedAt(task);
-    if (!startedAt) return '0s';
-
-    const diff = Math.floor((this.currentTime().getTime() - startedAt.getTime()) / 1000);
-    return this.formatDuration(diff);
+    const activities = this.sessionActivities()[task.name] || [];
+    const activeMs = calculateActiveDuration(task, activities, this.currentTime());
+    return this.formatDuration(Math.floor(activeMs / 1000));
   }
 
   getWorkedFor(task: Session): string {
-    if (!task.createTime || !task.updateTime) return '0s';
-
-    const start = new Date(task.createTime).getTime();
-    const end = new Date(task.updateTime).getTime();
-    const diff = Math.floor((end - start) / 1000);
-    return this.formatDuration(diff);
+    const activities = this.sessionActivities()[task.name] || [];
+    const activeMs = calculateActiveDuration(task, activities, this.currentTime());
+    return this.formatDuration(Math.floor(activeMs / 1000));
   }
 
   private formatDuration(seconds: number): string {
