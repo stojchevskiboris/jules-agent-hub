@@ -162,6 +162,9 @@
     </header>
 
     <div class="workspace-layout">
+      <!-- Sidebar Backdrop for Mobile -->
+      <div class="knowledge-sidebar-backdrop" *ngIf="knowledgeSidebarOpen()" (click)="toggleKnowledgeSidebar()"></div>
+
       <!-- Left side: Main workspace feed and actions -->
       <div class="workspace-main-panel">
         <!-- Activity Timeline -->

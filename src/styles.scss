@@ -148,7 +148,11 @@ html {
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
-  margin-left: auto;
+  margin-left: 0;
+
+  @media (min-width: 1024px) {
+    margin-left: auto;
+  }
 
   &:hover {
     background-color: #30363d;
@@ -275,8 +279,24 @@ html {
 
   .files-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 1rem;
+  }
+}
+
+/* Knowledge sidebar background backdrop for mobile */
+.knowledge-sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+
+  @media (min-width: 1024px) {
+    display: none;
   }
 }
 
@@ -290,6 +310,7 @@ html {
   flex-direction: column;
   gap: 0.75rem;
   transition: transform 0.2s, border-color 0.2s;
+  min-width: 0;
 
   &:hover {
     border-color: #8b949e;
@@ -307,15 +328,18 @@ html {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    min-width: 0;
 
     .file-emoji {
       font-size: 1.5rem;
+      flex-shrink: 0;
     }
 
     .file-meta {
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      min-width: 0;
 
       .file-name {
         font-weight: 600;
@@ -340,8 +364,10 @@ html {
 
     .status-row {
       display: flex;
+      flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
+      gap: 0.5rem;
     }
 
     .file-actions {
@@ -426,23 +452,30 @@ html {
    Active Session Workspace Sidebar (Task Knowledge Base)
    ========================================================================== */
 .workspace-sidebar-panel {
-  width: 100%;
-  border-top: 1px solid #30363d;
+  width: 320px;
+  max-width: 100%;
+  border-left: 1px solid #30363d;
   background-color: #161b22;
-  display: none;
+  display: flex;
   flex-direction: column;
-  height: 350px; /* static height on mobile */
+  height: 100dvh;
+  position: fixed;
+  top: 0;
+  right: -320px;
+  z-index: 1000;
   overflow: hidden;
+  transition: right 0.3s ease-in-out;
 
   &.open {
-    display: flex;
+    right: 0;
   }
 
   @media (min-width: 1024px) {
+    position: static;
     width: 340px;
     border-top: none;
-    border-left: 1px solid #30363d;
     height: 100%; /* full height on desktop */
+    transition: none;
   }
 
   .sidebar-header {
@@ -697,7 +730,7 @@ html {
 
   .modal-meta-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.75rem;
     background-color: #0d1117;
     border: 1px solid #30363d;
@@ -705,8 +738,12 @@ html {
     padding: 1rem;
     font-size: 0.85rem;
 
-    @media (min-width: 480px) {
-      grid-template-columns: repeat(4, 1fr);
+    @media (min-width: 380px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (min-width: 600px) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     strong {

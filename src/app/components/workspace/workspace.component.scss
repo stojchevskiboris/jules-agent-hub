@@ -150,14 +150,25 @@
 
     .session-info {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 0.5rem;
 
       @media (min-width: 768px) {
         gap: 1rem;
+        flex-wrap: nowrap;
       }
 
-      h3 { margin: 0; color: #f0f6fc; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+      h3 {
+        margin: 0;
+        color: #f0f6fc;
+        font-size: 1rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 200px;
+        word-break: break-all;
+      }
 
       @media (min-width: 768px) {
         h3 { font-size: 1.1rem; max-width: 400px; }
@@ -172,8 +183,13 @@
         gap: 0.75rem;
         font-size: 0.75rem;
         color: #8b949e;
-        border-left: 1px solid #30363d;
-        padding-left: 0.75rem;
+        border-left: none;
+        padding-left: 0;
+
+        @media (min-width: 768px) {
+          border-left: 1px solid #30363d;
+          padding-left: 0.75rem;
+        }
 
         .time-item {
           white-space: nowrap;
@@ -349,6 +365,7 @@
             padding: 0.75rem;
             border: none;
             border-radius: 0;
+            overflow-x: auto;
           }
         }
 
@@ -707,9 +724,15 @@
 
 .textarea-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.5rem;
   margin-bottom: 0.5rem;
+
+  @media (min-width: 480px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 
   label {
     margin-bottom: 0 !important;
