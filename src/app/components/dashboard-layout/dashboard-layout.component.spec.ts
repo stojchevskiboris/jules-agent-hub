@@ -49,12 +49,22 @@ import { Session, ListSessionsResponse } from '../../models/jules.models';
 describe('DashboardLayoutComponent (unit tests)', () => {
   let component: DashboardLayoutComponent;
   let mockApiService: any;
+  let localStorageMock: any;
+  let store: Record<string, string>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     component = new DashboardLayoutComponent();
     mockApiService = (component as any).apiService;
     mockApiService.getSessions.mockReturnValue(of({ sessions: [] }));
+
+    store = {};
+    localStorageMock = {
+      getItem: vi.fn((key: string) => store[key] || null),
+      setItem: vi.fn((key: string, value: string) => { store[key] = value; }),
+      removeItem: vi.fn((key: string) => { delete store[key]; })
+    };
+    vi.stubGlobal('localStorage', localStorageMock);
   });
 
   it('should initialize sessions and nextPageToken', () => {
@@ -71,6 +81,17 @@ describe('DashboardLayoutComponent (unit tests)', () => {
     expect(component.activeTab()).toBe('sources');
     component.setActiveTab('sessions');
     expect(component.activeTab()).toBe('sessions');
+  });
+
+  it('should prefill the Jules API key prompt when a key already exists', () => {
+    localStorage.setItem('JULES_API_KEY', 'existing-jules-key');
+
+    const promptSpy = vi.fn(() => null);
+    vi.stubGlobal('prompt', promptSpy);
+
+    component.setApiKey();
+
+    expect(promptSpy).toHaveBeenCalledWith('Enter your Jules API Key:', 'existing-jules-key');
   });
 
   describe('loadSessions', () => {

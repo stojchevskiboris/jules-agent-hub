@@ -506,6 +506,17 @@ describe('WorkspaceComponent (unit tests)', () => {
       expect(promptSpy).toHaveBeenCalled();
     });
 
+    it('should prefill the prompt with the stored Google API key when present', () => {
+      localStorage.setItem('GOOGLE_API_KEY', 'prefilled-api-key');
+
+      const promptSpy = vi.fn(() => null);
+      vi.stubGlobal('prompt', promptSpy);
+
+      component.setGoogleApiKey();
+
+      expect(promptSpy).toHaveBeenCalledWith('Enter your Google API Key:', 'prefilled-api-key');
+    });
+
     it('should set refined prompt on successful Gemini API fetch', async () => {
       localStorage.setItem('GOOGLE_API_KEY', 'valid-api-key-123');
       component.newPrompt.set('basic task');

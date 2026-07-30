@@ -734,7 +734,16 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   setGoogleApiKey() {
-    const key = prompt('Enter your Google API Key:');
+    let existingKey: string | null = null;
+    try {
+      existingKey = localStorage.getItem('GOOGLE_API_KEY');
+    } catch (e) {
+      console.error('Failed to access localStorage', e);
+    }
+
+    const key = existingKey !== null
+      ? prompt('Enter your Google API Key:', existingKey)
+      : prompt('Enter your Google API Key:');
     if (key !== null) {
       if (key.trim()) {
         localStorage.setItem('GOOGLE_API_KEY', key.trim());

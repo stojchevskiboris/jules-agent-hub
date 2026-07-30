@@ -205,7 +205,16 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
   getStateUI = getSessionStateUI;
 
   setApiKey() {
-    const key = prompt('Enter your Jules API Key:');
+    let existingKey: string | null = null;
+    try {
+      existingKey = localStorage.getItem('JULES_API_KEY');
+    } catch (e) {
+      console.error('Failed to access localStorage', e);
+    }
+
+    const key = existingKey !== null
+      ? prompt('Enter your Jules API Key:', existingKey)
+      : prompt('Enter your Jules API Key:');
     if (key) {
       localStorage.setItem('JULES_API_KEY', key);
       window.location.reload();
