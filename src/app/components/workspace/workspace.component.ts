@@ -48,6 +48,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
   activeSessionId = signal<string | null>(null);
   session = signal<Session | null>(null);
   activities = signal<Activity[]>([]);
+  seenActivityIds = new Set<string>();
   nextPageToken = signal<string | undefined>(undefined);
 
   newPrompt = signal<string>('');
@@ -101,6 +102,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
         this.selectedSource.set(params['source']);
         this.activeSessionId.set(null);
         this.activities.set([]);
+        this.seenActivityIds.clear();
         this.loadSavedFiles();
       }
       if (params['defaultBranch']) {
@@ -109,6 +111,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
       if (params['sessionId']) {
         if (this.activeSessionId() !== params['sessionId']) {
           this.activities.set([]);
+          this.seenActivityIds.clear();
           this.nextPageToken.set(undefined);
         }
         this.activeSessionId.set(params['sessionId']);
@@ -519,12 +522,19 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
 
   startPolling(id: string) {
     this.stopPolling();
-    // Use interval to trigger a poll cycle
-    this.pollingSub = interval(5000).pipe(
+    // Use interval to trigger a poll cycle with 30s refresh time
+    this.pollingSub = interval(30000).pipe(
       startWith(0)
     ).subscribe(() => {
       this.pollCycle(id);
     });
+  }
+
+  triggerManualRefresh() {
+    const id = this.activeSessionId();
+    if (id) {
+      this.startPolling(id);
+    }
   }
 
   private pollCycle(id: string) {
@@ -532,12 +542,30 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
       next: (res) => {
         const incomingActivities = res.activities || [];
         const existingIds = new Set(this.activities().map(a => a.id));
-        const newActivities = incomingActivities.filter(a => !existingIds.has(a.id));
+        const newActivities = incomingActivities.filter(a => !existingIds.has(a.id) && !this.seenActivityIds.has(a.id));
 
         const wasAtBottom = this.checkIfAtBottom();
 
         if (newActivities.length > 0) {
-          this.activities.update(current => [...current, ...newActivities]);
+          newActivities.forEach(a => this.seenActivityIds.add(a.id));
+
+          this.activities.update(current => {
+            let updated = [...current, ...newActivities];
+            if (updated.length >= 40) {
+              const startKeep = 15;
+              const lastKeep = 15;
+              const countToRemove = updated.length - (startKeep + lastKeep);
+              updated.splice(startKeep, countToRemove, {
+                id: 'spliced-placeholder',
+                name: 'activities/spliced-placeholder',
+                originator: 'system',
+                description: '... Spliced activities to save memory ...',
+                createTime: new Date().toISOString(),
+                isSplicedPlaceholder: true
+              } as any);
+            }
+            return updated;
+          });
 
           if (this.isInProgress()) {
             if (wasAtBottom) {

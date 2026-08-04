@@ -881,4 +881,115 @@ describe('WorkspaceComponent (unit tests)', () => {
       expect(duration).toBe(1200000);
     });
   });
+
+  describe('Activities Splicing and Manual Refresh', () => {
+    beforeEach(() => {
+      component.activities.set([]);
+      component.seenActivityIds.clear();
+    });
+
+    it('should splice activities when length is 40 or more, keeping first 15 and last 15', () => {
+      const mockActivities: Activity[] = Array.from({ length: 45 }, (_, i) => ({
+        id: `activity-${i}`,
+        name: `activities/activity-${i}`,
+        originator: 'agent',
+        description: `Activity description ${i}`,
+        createTime: new Date().toISOString()
+      }));
+
+      (component as any).apiService.getSessionActivities = vi.fn().mockReturnValue(of({
+        activities: mockActivities,
+        nextPageToken: undefined
+      }));
+      (component as any).apiService.getSession = vi.fn().mockReturnValue(of({
+        id: '123',
+        name: 'sessions/123',
+        prompt: 'test',
+        sourceContext: { source: 'test' }
+      }));
+
+      component.fetchSession('123');
+
+      (component as any).pollCycle('123');
+
+      const acts = component.activities();
+      expect(acts).toHaveLength(31);
+      expect(acts[0].id).toBe('initial-prompt-123');
+      expect(acts[1].id).toBe('activity-0');
+      expect(acts[14].id).toBe('activity-13');
+      expect(acts[15].id).toBe('spliced-placeholder');
+      expect(acts[15].description).toContain('Spliced activities');
+      expect(acts[16].id).toBe('activity-30');
+      expect(acts[30].id).toBe('activity-44');
+    });
+
+    it('should track seenActivityIds to prevent duplicate activities being added', () => {
+      const mockActivities: Activity[] = Array.from({ length: 40 }, (_, i) => ({
+        id: `act-${i}`,
+        name: `activities/act-${i}`,
+        originator: 'agent',
+        description: `Activity description ${i}`,
+        createTime: new Date().toISOString()
+      }));
+
+      (component as any).apiService.getSessionActivities = vi.fn().mockReturnValue(of({
+        activities: mockActivities,
+        nextPageToken: undefined
+      }));
+      (component as any).apiService.getSession = vi.fn().mockReturnValue(of({
+        id: '123',
+        name: 'sessions/123',
+        prompt: 'test',
+        sourceContext: { source: 'test' }
+      }));
+
+      (component as any).pollCycle('123');
+
+      expect(component.seenActivityIds.size).toBe(40);
+      expect(component.seenActivityIds.has('act-0')).toBe(true);
+      expect(component.seenActivityIds.has('act-39')).toBe(true);
+
+      const nextMockActivities: Activity[] = [
+        ...mockActivities.slice(20, 40),
+        {
+          id: 'act-new-1',
+          name: 'activities/act-new-1',
+          originator: 'agent',
+          description: 'New activity',
+          createTime: new Date().toISOString()
+        }
+      ];
+
+      (component as any).apiService.getSessionActivities = vi.fn().mockReturnValue(of({
+        activities: nextMockActivities,
+        nextPageToken: undefined
+      }));
+
+      (component as any).pollCycle('123');
+
+      expect(component.seenActivityIds.has('act-new-1')).toBe(true);
+      expect(component.seenActivityIds.size).toBe(41);
+    });
+
+    it('should clear seenActivityIds when activities are cleared on session change', () => {
+      component.seenActivityIds.add('some-id');
+      expect(component.seenActivityIds.size).toBe(1);
+
+      (component as any).route = {
+        queryParams: of({ sessionId: 'new-session' })
+      };
+      (component as any).ngOnInit();
+
+      expect(component.seenActivityIds.size).toBe(0);
+    });
+
+    it('should restart interval and poll immediately when triggerManualRefresh is called', () => {
+      const spyStartPolling = vi.spyOn(component, 'startPolling');
+      (component as any).activeSessionId.set('123');
+
+      component.triggerManualRefresh();
+
+      expect(spyStartPolling).toHaveBeenCalledWith('123');
+    });
+  });
 });
