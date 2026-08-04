@@ -766,3 +766,47 @@
   border-top-color: #58a6ff;
   animation: spin 1s ease-in-out infinite;
 }
+
+/* User UI Refresh Button */
+.btn-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+
+  &:hover {
+    background-color: #30363d;
+    border-color: #8b949e;
+  }
+}
+
+/* Spliced Placeholder Activities */
+.activity-item.spliced-placeholder {
+  align-self: center !important;
+  background-color: #161b22 !important;
+  border: 1px dashed #30363d !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  text-align: center !important;
+  color: #8b949e !important;
+  padding: 0.75rem 1rem !important;
+  font-style: italic !important;
+  font-size: 0.9rem !important;
+  box-shadow: none !important;
+
+  .activity-meta {
+    display: none !important;
+  }
+
+  .activity-text {
+    margin: 0 !important;
+  }
+}

@@ -144,6 +144,10 @@
           📚 Knowledge Base <span class="badge-count" *ngIf="uploadedFiles().length > 0">{{ uploadedFiles().length }}</span>
         </button>
 
+        <button class="btn-refresh" (click)="triggerManualRefresh()" title="Refresh Session Activities">
+          🔄 Refresh
+        </button>
+
         <div class="pr-link-wrapper" *ngIf="getPullRequest() as pr">
           <span *ngIf="pr.merged === false" class="unmerged-icon" title="PR is not merged">🧩</span>
           <span *ngIf="pr.merged && session()?.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
@@ -168,7 +172,9 @@
         <div class="feed-wrapper">
           <div class="activity-feed" #scrollContainer (scroll)="onScroll()">
             <div *ngFor="let activity of activities(); trackBy: trackByActivityId" class="activity-item"
-              [class.user-msg]="activity.originator === 'user'" [class.agent-msg]="activity.originator !== 'user'">
+              [class.user-msg]="activity.originator === 'user'"
+              [class.agent-msg]="activity.originator !== 'user'"
+              [class.spliced-placeholder]="activity.id === 'spliced-placeholder'">
             <div class="activity-meta">
               <span class="author">
                 <ng-container [ngSwitch]="activity.originator">
