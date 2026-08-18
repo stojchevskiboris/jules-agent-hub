@@ -126,7 +126,7 @@
     <header class="workspace-header">
       <div class="session-info">
         <a routerLink="/tasks" class="btn-back-icon" title="Back to Task Board">←</a>
-        <h3>{{ truncateTitle(session()?.title || getShortName(session()?.name || ''), 30) }}</h3>
+        <h3 [title]="session()?.title || getShortName(session()?.name || '')">{{ session()?.title || getShortName(session()?.name || '') }}</h3>
 
         <div class="status-time-meta">
           <span class="status-badge" [class]="getStateUI(session()?.state).class" [title]="getStateUI(session()?.state).description">
