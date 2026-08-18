@@ -134,8 +134,8 @@ html {
    Contextual Knowledge Base Styling
    ========================================================================== */
 
-/* Button Knowledge Base Toggle */
-.btn-knowledge-toggle {
+/* Button Knowledge Base Toggle & Refresh */
+.btn-knowledge-toggle, .btn-refresh {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -148,7 +148,6 @@ html {
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
-  margin-left: auto;
 
   @media (max-width: 767px) {
     padding: 0.4rem 0.6rem;
@@ -178,6 +177,10 @@ html {
     border-radius: 10px;
     font-weight: 600;
   }
+}
+
+.btn-knowledge-toggle {
+  margin-left: auto;
 }
 
 /* Upload Dropzone styling */
