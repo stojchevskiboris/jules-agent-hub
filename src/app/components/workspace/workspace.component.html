@@ -127,25 +127,29 @@
       <div class="session-info">
         <a routerLink="/tasks" class="btn-back-icon" title="Back to Task Board">←</a>
         <h3>{{ truncateTitle(session()?.title || getShortName(session()?.name || ''), 30) }}</h3>
-        <span class="status-badge" [class]="getStateUI(session()?.state).class" [title]="getStateUI(session()?.state).description">
-          {{ getStateUI(session()?.state).name }}
-          <span *ngIf="isAwaitingFeedback()">🧙‍♂️</span>
-        </span>
 
-        <div *ngIf="!isFinished()" class="time-meta">
-          <span class="time-item">Started at: {{ getStartedAt() | date:'shortTime' }}</span>
-          <span class="time-item" *ngIf="isInProgress()">Elapsed: {{ getElapsed() }}</span>
-        </div>
-        <div *ngIf="isFinished()" class="time-meta">
-          <span class="time-item">Worked for: {{ getWorkedFor() }}</span>
+        <div class="status-time-meta">
+          <span class="status-badge" [class]="getStateUI(session()?.state).class" [title]="getStateUI(session()?.state).description">
+            {{ getStateUI(session()?.state).name }}
+            <span *ngIf="isAwaitingFeedback()">🧙‍♂️</span>
+          </span>
+
+          <div *ngIf="!isFinished()" class="time-meta">
+            <span class="time-item">Started at: {{ getStartedAt() | date:'shortTime' }}</span>
+            <span class="time-item" *ngIf="isInProgress()">Elapsed: {{ getElapsed() }}</span>
+          </div>
+          <div *ngIf="isFinished()" class="time-meta">
+            <span class="time-item">Started at: {{ getStartedAt() | date:'shortTime' }}</span>
+            <span class="time-item">Worked for: {{ getWorkedFor() }}</span>
+          </div>
         </div>
 
         <button class="btn-knowledge-toggle" (click)="toggleKnowledgeSidebar()" title="Toggle Contextual Knowledge Base" [class.active]="knowledgeSidebarOpen()">
-          📚 Knowledge Base <span class="badge-count" *ngIf="uploadedFiles().length > 0">{{ uploadedFiles().length }}</span>
+          📚 <span class="btn-label">Knowledge Base</span> <span class="badge-count" *ngIf="uploadedFiles().length > 0">{{ uploadedFiles().length }}</span>
         </button>
 
         <button class="btn-refresh" (click)="triggerManualRefresh()" title="Refresh Session Activities">
-          🔄 Refresh
+          🔄 <span class="btn-label">Refresh</span>
         </button>
 
         <div class="pr-link-wrapper" *ngIf="getPullRequest() as pr">

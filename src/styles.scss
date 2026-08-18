@@ -150,6 +150,15 @@ html {
   transition: background-color 0.2s, border-color 0.2s;
   margin-left: auto;
 
+  @media (max-width: 767px) {
+    padding: 0.4rem 0.6rem;
+    gap: 0.25rem;
+
+    .btn-label {
+      display: none !important;
+    }
+  }
+
   &:hover {
     background-color: #30363d;
     border-color: #8b949e;

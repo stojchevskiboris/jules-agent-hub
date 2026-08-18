@@ -991,5 +991,23 @@ describe('WorkspaceComponent (unit tests)', () => {
 
       expect(spyStartPolling).toHaveBeenCalledWith('123');
     });
+
+    describe('Mobile Header Responsive Layout', () => {
+      it('should return correct status state UI and time getters for session header', () => {
+        const mockSession: Session = {
+          name: 'sessions/s1',
+          id: 's1',
+          title: 'Test Session',
+          state: 'IN_PROGRESS' as any,
+          createTime: new Date(Date.now() - 138000).toISOString()
+        };
+        (component as any).session.set(mockSession);
+        (component as any).activeSessionId.set('s1');
+
+        expect(component.getStateUI(mockSession.state).name).toBe('In Progress');
+        expect(component.getStartedAt()).toEqual(new Date(mockSession.createTime!));
+        expect(component.getElapsed()).toBeDefined();
+      });
+    });
   });
 });
