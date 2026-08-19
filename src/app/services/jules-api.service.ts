@@ -69,6 +69,10 @@ export class JulesApiService {
     return this.http.post<void>(`${this.baseUrl}/${sessionId}:approvePlan`, {});
   }
 
+  deleteSession(sessionId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${sessionId}`);
+  }
+
   pollSessionActivities(sessionId: string, getPageToken: () => string | undefined, intervalMs: number = 5000): Observable<ListActivitiesResponse> {
     return interval(intervalMs).pipe(
       startWith(0),

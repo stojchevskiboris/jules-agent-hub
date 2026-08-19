@@ -49,12 +49,33 @@
                 [class.active]="currentSessionId() === session.name">
               <span class="session-name">
                 <span class="name-text">
-                  {{ truncateTitle(session.title || getShortName(session.name), 30) }}
+                  {{ truncateTitle(session.title || getShortName(session.name), 22) }}
                   <span *ngIf="isAwaitingFeedback(session)">🧙‍♂️</span>
                 </span>
-                <span class="status-dot" [class]="getStateUI(session.state).class" [title]="getStateUI(session.state).description"></span>
-                <span *ngIf="getPullRequest(session)?.merged === false" class="unmerged-icon" title="PR is not merged">🧩</span>
-                <span *ngIf="getPullRequest(session)?.merged && session.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
+                <span class="session-meta">
+                  <span class="status-dot" [class]="getStateUI(session.state).class" [title]="getStateUI(session.state).description"></span>
+                  <span *ngIf="getPullRequest(session)?.merged === false" class="unmerged-icon" title="PR is not merged">🧩</span>
+                  <span *ngIf="getPullRequest(session)?.merged && session.state === 'COMPLETED'" class="merged-icon" title="PR is merged">✅</span>
+                  <div class="session-menu-container">
+                    <button class="session-menu-btn" (click)="toggleSessionMenu(session, $event)" title="Options">
+                      &#8942;
+                    </button>
+                    <div class="session-dropdown-menu" *ngIf="openMenuSessionId() === session.name" (click)="$event.stopPropagation()">
+                      <button class="dropdown-item" (click)="togglePauseSession(session, $event)">
+                        <span class="option-icon">{{ (session.state === 'PAUSED') ? '▶️' : '⏸️' }}</span>
+                        <span class="option-label">{{ (session.state === 'PAUSED') ? 'Resume Session' : 'Pause session' }}</span>
+                      </button>
+                      <button class="dropdown-item" (click)="copySessionUrl(session, $event)">
+                        <span class="option-icon">📋</span>
+                        <span class="option-label">Copy Session Url</span>
+                      </button>
+                      <button class="dropdown-item" (click)="archiveSession(session, $event)">
+                        <span class="option-icon">📦</span>
+                        <span class="option-label">Archive</span>
+                      </button>
+                    </div>
+                  </div>
+                </span>
               </span>
             </li>
           </ul>

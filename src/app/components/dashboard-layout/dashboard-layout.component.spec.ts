@@ -10,7 +10,8 @@ vi.mock('@angular/core', async () => {
     inject: vi.fn(() => ({
       sessionCreated$: of(),
       getSessions: vi.fn().mockReturnValue(of({ sessions: [] })),
-      getSources: vi.fn().mockReturnValue(of({ sources: [] }))
+      getSources: vi.fn().mockReturnValue(of({ sources: [] })),
+      deleteSession: vi.fn().mockReturnValue(of(undefined))
     })),
     signal: vi.fn((initialValue) => {
       let value = initialValue;
@@ -176,6 +177,96 @@ describe('DashboardLayoutComponent (unit tests)', () => {
       component.loadMoreSessions();
 
       expect(spy).toHaveBeenCalledWith('token123');
+    });
+  });
+
+  describe('Session Menu Actions', () => {
+    let mockSession: Session;
+    let mockEvent: any;
+
+    beforeEach(() => {
+      mockSession = {
+        name: 'sessions/123',
+        id: '123',
+        prompt: 'Test task',
+        title: 'Test Session',
+        state: 'IN_PROGRESS',
+        url: 'https://jules.google.com/session/123',
+        sourceContext: { source: 'sources/repo1' }
+      };
+      mockEvent = {
+        stopPropagation: vi.fn()
+      };
+      component.sessions.set([mockSession]);
+    });
+
+    it('should toggle session menu open and closed', () => {
+      expect(component.openMenuSessionId()).toBeNull();
+
+      component.toggleSessionMenu(mockSession, mockEvent);
+
+      expect(mockEvent.stopPropagation).toHaveBeenCalled();
+      expect(component.openMenuSessionId()).toBe('sessions/123');
+
+      component.toggleSessionMenu(mockSession, mockEvent);
+
+      expect(component.openMenuSessionId()).toBeNull();
+    });
+
+    it('should pause an active session when togglePauseSession is called', () => {
+      component.openMenuSessionId.set('sessions/123');
+
+      component.togglePauseSession(mockSession, mockEvent);
+
+      expect(mockEvent.stopPropagation).toHaveBeenCalled();
+      expect(component.sessions()[0].state).toBe('PAUSED');
+      expect(component.openMenuSessionId()).toBeNull();
+    });
+
+    it('should resume a paused session when togglePauseSession is called', () => {
+      const pausedSession = { ...mockSession, state: 'PAUSED' };
+      component.sessions.set([pausedSession]);
+      component.openMenuSessionId.set('sessions/123');
+
+      component.togglePauseSession(pausedSession, mockEvent);
+
+      expect(component.sessions()[0].state).toBe('IN_PROGRESS');
+      expect(component.openMenuSessionId()).toBeNull();
+    });
+
+    it('should copy session URL using navigator.clipboard', () => {
+      const writeTextMock = vi.fn().mockResolvedValue(undefined);
+      vi.stubGlobal('navigator', {
+        clipboard: { writeText: writeTextMock }
+      });
+      component.openMenuSessionId.set('sessions/123');
+
+      component.copySessionUrl(mockSession, mockEvent);
+
+      expect(mockEvent.stopPropagation).toHaveBeenCalled();
+      expect(writeTextMock).toHaveBeenCalledWith('https://jules.google.com/session/123');
+      expect(component.openMenuSessionId()).toBeNull();
+    });
+
+    it('should archive session by calling deleteSession API and removing it from list', () => {
+      mockApiService.deleteSession.mockReturnValue(of(undefined));
+      component.openMenuSessionId.set('sessions/123');
+
+      component.archiveSession(mockSession, mockEvent);
+
+      expect(mockEvent.stopPropagation).toHaveBeenCalled();
+      expect(mockApiService.deleteSession).toHaveBeenCalledWith('sessions/123');
+      expect(component.sessions()).toHaveLength(0);
+      expect(component.openMenuSessionId()).toBeNull();
+    });
+
+    it('should close menu on document click outside .session-menu-container', () => {
+      component.openMenuSessionId.set('sessions/123');
+
+      const mockTarget = { closest: vi.fn().mockReturnValue(null) };
+      component.onDocumentClick({ target: mockTarget } as any);
+
+      expect(component.openMenuSessionId()).toBeNull();
     });
   });
 });
