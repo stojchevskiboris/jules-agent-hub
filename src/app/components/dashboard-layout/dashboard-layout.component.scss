@@ -246,6 +246,7 @@
         cursor: pointer;
         font-size: 0.9rem;
         transition: background 0.2s, color 0.2s;
+        position: relative;
 
         &:hover {
           background-color: #21262d;
@@ -257,15 +258,13 @@
           font-weight: 500;
         }
 
-        span {
-          display: block;
-          overflow: hidden;
-          text-overflow: ellipsis;
+        .session-name {
           white-space: nowrap;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 4px;
+          width: 100%;
 
           .name-text {
             overflow: hidden;
@@ -274,6 +273,8 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            flex: 1;
+            min-width: 0;
           }
 
           .unmerged-icon, .merged-icon {
@@ -296,6 +297,85 @@
             &.paused { background-color: #8b949e; }
             &.completed { background-color: #3fb950; }
             &.failed { background-color: #f85149; }
+          }
+        }
+
+        .session-meta {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+
+        .session-menu-container {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+
+        .session-menu-btn {
+          background: none;
+          border: none;
+          color: #8b949e;
+          padding: 2px 4px;
+          font-size: 1.1rem;
+          line-height: 1;
+          cursor: pointer;
+          border-radius: 4px;
+
+          &:hover {
+            color: #f0f6fc;
+            background-color: #30363d;
+          }
+        }
+
+        .session-dropdown-menu {
+          position: absolute;
+          right: 0;
+          top: 100%;
+          margin-top: 4px;
+          background-color: #21262d;
+          border: 1px solid #484f58;
+          border-radius: 6px;
+          padding: 4px;
+          z-index: 10000;
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+          min-width: 160px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+
+          .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            background: none;
+            border: none;
+            color: #f0f6fc;
+            padding: 6px 10px;
+            font-size: 0.825rem;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.15s, color 0.15s;
+
+            &:hover {
+              background-color: #30363d;
+              color: #ffffff;
+            }
+
+            .option-icon {
+              font-size: 0.9rem;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 16px;
+            }
+
+            .option-label {
+              white-space: nowrap;
+            }
           }
         }
       }

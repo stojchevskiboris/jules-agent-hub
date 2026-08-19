@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -30,6 +30,7 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
   sidebarOpen = signal<boolean>(false);
   apiKeyValid = signal<boolean>(false);
   activeTab = signal<'sessions' | 'sources'>('sessions');
+  openMenuSessionId = signal<string | null>(null);
 
   currentSessionId = signal<string | null>(null);
   currentSource = signal<string | null>(null);
@@ -203,6 +204,55 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
   }
 
   getStateUI = getSessionStateUI;
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.session-menu-container')) {
+      this.openMenuSessionId.set(null);
+    }
+  }
+
+  toggleSessionMenu(session: Session, event: Event) {
+    event.stopPropagation();
+    if (this.openMenuSessionId() === session.name) {
+      this.openMenuSessionId.set(null);
+    } else {
+      this.openMenuSessionId.set(session.name);
+    }
+  }
+
+  togglePauseSession(session: Session, event: Event) {
+    event.stopPropagation();
+    const isPaused = session.state === SessionState.PAUSED || session.state === 'PAUSED';
+    const newState = isPaused ? SessionState.IN_PROGRESS : SessionState.PAUSED;
+
+    this.sessions.update(list => list.map(s => s.name === session.name ? { ...s, state: newState } : s));
+    this.openMenuSessionId.set(null);
+  }
+
+  copySessionUrl(session: Session, event: Event) {
+    event.stopPropagation();
+    const url = session.url || `${window.location.origin}/workspace?sessionId=${encodeURIComponent(session.name)}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).catch(err => console.error('Failed to copy session URL', err));
+    }
+    this.openMenuSessionId.set(null);
+  }
+
+  archiveSession(session: Session, event: Event) {
+    event.stopPropagation();
+    this.openMenuSessionId.set(null);
+    this.apiService.deleteSession(session.name).subscribe({
+      next: () => {
+        this.sessions.update(list => list.filter(s => s.name !== session.name));
+      },
+      error: (err) => {
+        console.error('Failed to archive session', err);
+        this.sessions.update(list => list.filter(s => s.name !== session.name));
+      }
+    });
+  }
 
   setApiKey() {
     let existingKey: string | null = null;
