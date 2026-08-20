@@ -5,7 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { JulesApiService } from '../../services/jules-api.service';
-import { Source, Session, getSessionStateUI, SessionState } from '../../models/jules.models';
+import { Source, Session, getSessionStateUI } from '../../models/jules.models';
 
 const API_KEY_ERROR_MESSAGE = 'Jules API key is needed';
 
@@ -220,15 +220,6 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
     } else {
       this.openMenuSessionId.set(session.name);
     }
-  }
-
-  togglePauseSession(session: Session, event: Event) {
-    event.stopPropagation();
-    const isPaused = session.state === SessionState.PAUSED || session.state === 'PAUSED';
-    const newState = isPaused ? SessionState.IN_PROGRESS : SessionState.PAUSED;
-
-    this.sessions.update(list => list.map(s => s.name === session.name ? { ...s, state: newState } : s));
-    this.openMenuSessionId.set(null);
   }
 
   copySessionUrl(session: Session, event: Event) {

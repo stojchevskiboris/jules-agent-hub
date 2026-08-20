@@ -213,27 +213,6 @@ describe('DashboardLayoutComponent (unit tests)', () => {
       expect(component.openMenuSessionId()).toBeNull();
     });
 
-    it('should pause an active session when togglePauseSession is called', () => {
-      component.openMenuSessionId.set('sessions/123');
-
-      component.togglePauseSession(mockSession, mockEvent);
-
-      expect(mockEvent.stopPropagation).toHaveBeenCalled();
-      expect(component.sessions()[0].state).toBe('PAUSED');
-      expect(component.openMenuSessionId()).toBeNull();
-    });
-
-    it('should resume a paused session when togglePauseSession is called', () => {
-      const pausedSession = { ...mockSession, state: 'PAUSED' };
-      component.sessions.set([pausedSession]);
-      component.openMenuSessionId.set('sessions/123');
-
-      component.togglePauseSession(pausedSession, mockEvent);
-
-      expect(component.sessions()[0].state).toBe('IN_PROGRESS');
-      expect(component.openMenuSessionId()).toBeNull();
-    });
-
     it('should copy session URL using navigator.clipboard', () => {
       const writeTextMock = vi.fn().mockResolvedValue(undefined);
       vi.stubGlobal('navigator', {
