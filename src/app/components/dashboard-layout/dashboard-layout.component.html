@@ -61,10 +61,6 @@
                       &#8942;
                     </button>
                     <div class="session-dropdown-menu" *ngIf="openMenuSessionId() === session.name" (click)="$event.stopPropagation()">
-                      <button class="dropdown-item" (click)="togglePauseSession(session, $event)">
-                        <span class="option-icon">{{ (session.state === 'PAUSED') ? '▶️' : '⏸️' }}</span>
-                        <span class="option-label">{{ (session.state === 'PAUSED') ? 'Resume Session' : 'Pause session' }}</span>
-                      </button>
                       <button class="dropdown-item" (click)="copySessionUrl(session, $event)">
                         <span class="option-icon">📋</span>
                         <span class="option-label">Copy Session Url</span>
