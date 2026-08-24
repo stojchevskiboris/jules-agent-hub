@@ -409,17 +409,23 @@ describe('WorkspaceComponent (unit tests)', () => {
       expect(component.getSourceUrl('sources/github.com/google/guava')).toBe('https://github.com/google/guava');
     });
 
+    it('should strip github/ prefix', () => {
+      expect(component.getSourceUrl('github/stojchevskiboris/alternativna-medicina-dev')).toBe('https://github.com/stojchevskiboris/alternativna-medicina-dev');
+      expect(component.getSourceUrl('sources/github/stojchevskiboris/alternativna-medicina-dev')).toBe('https://github.com/stojchevskiboris/alternativna-medicina-dev');
+    });
+
     it('should keep existing http or https protocol', () => {
       expect(component.getSourceUrl('https://github.com/google/guava')).toBe('https://github.com/google/guava');
       expect(component.getSourceUrl('http://github.com/google/guava')).toBe('http://github.com/google/guava');
     });
 
-    it('should prefix https to github.com/ references', () => {
+    it('should format github.com/ references', () => {
       expect(component.getSourceUrl('github.com/google/guava')).toBe('https://github.com/google/guava');
     });
 
     it('should prefix github.com for owner/repo formats', () => {
       expect(component.getSourceUrl('google/guava')).toBe('https://github.com/google/guava');
+      expect(component.getSourceUrl('stojchevskiboris/alternativna-medicina-dev')).toBe('https://github.com/stojchevskiboris/alternativna-medicina-dev');
     });
   });
 

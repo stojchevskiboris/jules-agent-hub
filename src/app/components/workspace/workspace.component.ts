@@ -1074,17 +1074,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!source) return null;
     let clean = source.trim();
     if (!clean) return null;
-    if (clean.startsWith('sources/')) {
-      clean = clean.substring('sources/'.length);
-    }
+
     if (clean.startsWith('https://') || clean.startsWith('http://')) {
       return clean;
     }
-    if (clean.startsWith('github.com/')) {
-      return `https://${clean}`;
+    if (clean.startsWith('sources/')) {
+      clean = clean.substring('sources/'.length);
     }
-    if (clean.includes('/')) {
-      return `https://github.com/${clean}`;
+    if (clean.startsWith('github.com/')) {
+      clean = clean.substring('github.com/'.length);
+    } else if (clean.startsWith('github/')) {
+      clean = clean.substring('github/'.length);
     }
     return `https://github.com/${clean}`;
   }
