@@ -75,17 +75,24 @@
     .form-group {
       margin-bottom: 1.5rem;
       label { display: block; margin-bottom: 0.5rem; color: #c9d1d9; font-size: 0.9rem; }
-      textarea {
+      .field-desc { margin: -0.25rem 0 0.5rem; color: #8b949e; font-size: 0.8rem; }
+      .required-asterisk { color: #f85149; margin-left: 0.2rem; }
+      textarea, .form-control {
         width: 100%;
         background: #0d1117;
         border: 1px solid #30363d;
         border-radius: 6px;
         color: #c9d1d9;
         padding: 0.75rem;
-        font-family: inherit;
+        font: inherit;
         font-size: 0.9rem;
-        resize: vertical;
         &:focus { outline: none; border-color: #58a6ff; }
+      }
+      textarea { resize: vertical; }
+      select.form-control {
+        appearance: none;
+        background: #0d1117 url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238B949E'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 0.75rem center / 1.25rem;
+        padding-right: 2rem;
       }
     }
 
@@ -320,19 +327,9 @@
           font-style: italic;
         }
 
-        h1, h2, h3, h4, h5, h6 {
-          margin: 1rem 0 0.5rem 0;
-          font-weight: bold;
-          color: #f0f6fc;
-          line-height: 1.25;
-        }
-
-        h1 { font-size: 1.5rem; border-bottom: 1px solid #30363d; padding-bottom: 0.3rem; }
-        h2 { font-size: 1.3rem; border-bottom: 1px solid #30363d; padding-bottom: 0.3rem; }
-        h3 { font-size: 1.1rem; }
-        h4 { font-size: 1rem; }
-        h5 { font-size: 0.9rem; }
-        h6 { font-size: 0.85rem; color: #8b949e; }
+        h1, h2, h3, h4, h5, h6 { margin: 1rem 0 0.5rem; font-weight: bold; color: #f0f6fc; line-height: 1.25; }
+        h1, h2 { border-bottom: 1px solid #30363d; padding-bottom: 0.3rem; }
+        h1 { font-size: 1.5rem; } h2 { font-size: 1.3rem; } h3 { font-size: 1.1rem; } h4 { font-size: 1rem; } h5 { font-size: 0.9rem; } h6 { font-size: 0.85rem; color: #8b949e; }
 
         .list-item-wrapper {
           display: flex;
@@ -529,36 +526,9 @@
   }
 
   .btn-scroll-bottom {
-    position: absolute;
-    bottom: 1rem;
-    right: 1.5rem;
-    background-color: #21262d;
-    color: #c9d1d9;
-    border: 1px solid #30363d;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    z-index: 10;
-    transition: all 0.2s;
-
-    &:hover {
-      background-color: #30363d;
-      border-color: #8b949e;
-    }
-
-    &.has-new {
-      background-color: #1f6feb;
-      color: white;
-      border-color: #388bfd;
-      animation: pulse 2s infinite;
-
-      &:hover {
-        background-color: #388bfd;
-      }
-    }
+    position: absolute; bottom: 1rem; right: 1.5rem; background: #21262d; color: #c9d1d9; border: 1px solid #30363d; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10; transition: all 0.2s;
+    &:hover { background: #30363d; border-color: #8b949e; }
+    &.has-new { background: #1f6feb; color: white; border-color: #388bfd; animation: pulse 2s infinite; &:hover { background: #388bfd; } }
   }
 
   @keyframes pulse {
@@ -763,39 +733,18 @@
 }
 
 .btn-api-config, .btn-refactor {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.35rem 0.75rem;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; font-weight: 600; padding: 0.35rem 0.75rem; border-radius: 4px; cursor: pointer; transition: all 0.2s; background: #21262d; border: 1px solid #30363d;
 }
 
 .btn-api-config {
-  background-color: #21262d;
   color: #c9d1d9;
-  border: 1px solid #30363d;
-  &:hover:not(:disabled) {
-    background-color: #30363d;
-    border-color: #8b949e;
-  }
+  &:hover:not(:disabled) { background: #30363d; border-color: #8b949e; }
 }
 
 .btn-refactor {
-  background-color: #21262d;
   color: #58a6ff;
-  border: 1px solid #30363d;
-  &:hover:not(:disabled) {
-    background-color: rgba(56, 139, 253, 0.15);
-    border-color: #58a6ff;
-  }
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  &:hover:not(:disabled) { background: rgba(56, 139, 253, 0.15); border-color: #58a6ff; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .loader-spinner {

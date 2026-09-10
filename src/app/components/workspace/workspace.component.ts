@@ -45,6 +45,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
 
   selectedSource = signal<string | null>(null);
   defaultBranch = signal<string | null>(null);
+  startingBranch = signal<string>('main');
+  availableBranches = signal<string[]>([]);
   activeSessionId = signal<string | null>(null);
   session = signal<Session | null>(null);
   activities = signal<Activity[]>([]);
@@ -104,9 +106,20 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
         this.activities.set([]);
         this.seenActivityIds.clear();
         this.loadSavedFiles();
-      }
-      if (params['defaultBranch']) {
-        this.defaultBranch.set(params['defaultBranch']);
+
+        // Fetch source info or parse query params for branches
+        const branchesParam = params['branches'];
+        const branchList = branchesParam ? branchesParam.split(',').filter(Boolean) : [];
+        const defBranch = params['defaultBranch'] || null;
+        this.defaultBranch.set(defBranch);
+        this.availableBranches.set(branchList);
+
+        if (branchList.length > 0) {
+          this.startingBranch.set(this.resolveDefaultBaseBranch(branchList, defBranch));
+        } else {
+          // Fetch source directly via apiService to get branch details if not provided in queryParams
+          this.fetchSourceBranches(params['source'], defBranch);
+        }
       }
       if (params['sessionId']) {
         if (this.activeSessionId() !== params['sessionId']) {
@@ -433,10 +446,49 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
     this.viewingFileDetails.set(null);
   }
 
+  resolveDefaultBaseBranch(branches?: (string | { displayName: string })[], defaultBranchName?: string | null): string {
+    const names = (branches || []).map(b => typeof b === 'string' ? b : b.displayName);
+    if (names.includes('main')) {
+      return 'main';
+    }
+    if (names.includes('master')) {
+      return 'master';
+    }
+    if (defaultBranchName && names.includes(defaultBranchName)) {
+      return defaultBranchName;
+    }
+    if (defaultBranchName) {
+      return defaultBranchName;
+    }
+    return 'main';
+  }
+
+  fetchSourceBranches(sourceName: string, fallbackDefaultBranch?: string | null) {
+    this.apiService.getSources().subscribe({
+      next: (res) => {
+        const found = res.sources?.find(s => s.name === sourceName);
+        if (found) {
+          const branchObjs = found.githubRepo?.branches || [];
+          const branchNames = branchObjs.map(b => b.displayName);
+          const defBranch = found.githubRepo?.defaultBranch?.displayName || fallbackDefaultBranch || null;
+          this.defaultBranch.set(defBranch);
+          this.availableBranches.set(branchNames);
+          this.startingBranch.set(this.resolveDefaultBaseBranch(branchNames, defBranch));
+        } else {
+          this.startingBranch.set(this.resolveDefaultBaseBranch([], fallbackDefaultBranch));
+        }
+      },
+      error: () => {
+        this.startingBranch.set(this.resolveDefaultBaseBranch([], fallbackDefaultBranch));
+      }
+    });
+  }
+
   createSession() {
     const source = this.selectedSource();
     let prompt = this.newPrompt();
-    if (!source || !prompt) return;
+    const branch = this.startingBranch()?.trim();
+    if (!source || !prompt || !branch) return;
 
     // Task Initiation Integration: Append files inside tags to initial prompt
     const integratedFiles = this.uploadedFiles().filter(f => f.status === 'INTEGRATED');
@@ -457,7 +509,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.loading.set(true);
-    this.apiService.createSession(source, prompt, this.automationMode(), this.defaultBranch() || undefined).subscribe({
+    this.apiService.createSession(source, prompt, this.automationMode(), branch).subscribe({
       next: (session) => {
         // Clear task initiation files upon success so they aren't carried over
         const key = this.getStorageKey();
