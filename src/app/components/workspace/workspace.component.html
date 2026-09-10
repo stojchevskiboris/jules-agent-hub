@@ -14,6 +14,19 @@
       </div>
 
       <div class="form-group">
+        <label for="baseBranchSelect">Upstream Base Branch <span class="required-asterisk">*</span></label>
+        <p class="field-desc">The target branch from which the feature branch will originate and PRs will be submitted.</p>
+        <ng-container *ngIf="availableBranches().length > 0; else textBranchInput">
+          <select id="baseBranchSelect" class="form-control" [(ngModel)]="startingBranch">
+            <option *ngFor="let branch of availableBranches()" [value]="branch">{{ branch }}</option>
+          </select>
+        </ng-container>
+        <ng-template #textBranchInput>
+          <input id="baseBranchSelect" type="text" class="form-control" [(ngModel)]="startingBranch" placeholder="e.g., main" required>
+        </ng-template>
+      </div>
+
+      <div class="form-group">
         <div class="textarea-header">
           <label>What would you like Jules to do?</label>
           <div class="prompt-actions">
@@ -106,7 +119,7 @@
           Auto-create Pull Request
         </label>
 
-        <button class="btn-primary" (click)="createSession()" [disabled]="loading() || !newPrompt()">
+        <button class="btn-primary" (click)="createSession()" [disabled]="loading() || !newPrompt() || !startingBranch().trim()">
           {{ loading() ? 'Starting...' : 'Launch Agent' }}
         </button>
       </div>

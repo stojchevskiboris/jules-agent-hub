@@ -1016,4 +1016,66 @@ describe('WorkspaceComponent (unit tests)', () => {
       });
     });
   });
+
+  describe('Upstream Base Branch Configuration', () => {
+    it('should default to main when main branch exists in repository branches', () => {
+      const branches = ['feature/x', 'main', 'master', 'develop'];
+      const resolved = component.resolveDefaultBaseBranch(branches, 'develop');
+      expect(resolved).toBe('main');
+    });
+
+    it('should fall back to master when main branch is absent but master exists', () => {
+      const branches = ['feature/x', 'master', 'develop'];
+      const resolved = component.resolveDefaultBaseBranch(branches, 'develop');
+      expect(resolved).toBe('master');
+    });
+
+    it('should fall back to defaultBranch when both main and master are absent', () => {
+      const branches = ['feature/x', 'develop', 'release'];
+      const resolved = component.resolveDefaultBaseBranch(branches, 'develop');
+      expect(resolved).toBe('develop');
+    });
+
+    it('should fall back to main when branches list is empty and no default branch is specified', () => {
+      const resolved = component.resolveDefaultBaseBranch([], null);
+      expect(resolved).toBe('main');
+    });
+
+    it('should allow user to manually override startingBranch signal', () => {
+      component.startingBranch.set('main');
+      expect(component.startingBranch()).toBe('main');
+
+      component.startingBranch.set('release/1.0');
+      expect(component.startingBranch()).toBe('release/1.0');
+    });
+
+    it('should pass startingBranch to JulesApiService.createSession', () => {
+      component.selectedSource.set('sources/github/owner/repo');
+      component.newPrompt.set('Implement feature Z');
+      component.startingBranch.set('develop');
+
+      (component as any).apiService.createSession = vi.fn().mockReturnValue(of({ name: 'sessions/100' }));
+      (component as any).router.navigate = vi.fn();
+
+      component.createSession();
+
+      expect((component as any).apiService.createSession).toHaveBeenCalledWith(
+        'sources/github/owner/repo',
+        'Implement feature Z',
+        expect.any(String),
+        'develop'
+      );
+    });
+
+    it('should not create session if startingBranch is empty or whitespace', () => {
+      component.selectedSource.set('sources/github/owner/repo');
+      component.newPrompt.set('Implement feature Z');
+      component.startingBranch.set('   ');
+
+      (component as any).apiService.createSession = vi.fn();
+      component.createSession();
+
+      expect((component as any).apiService.createSession).not.toHaveBeenCalled();
+    });
+  });
 });

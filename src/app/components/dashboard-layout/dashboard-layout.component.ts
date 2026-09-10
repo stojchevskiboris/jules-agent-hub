@@ -178,7 +178,14 @@ export class DashboardLayoutComponent implements OnInit, OnDestroy {
 
   selectSource(source: Source) {
     // Navigate to workspace with source as parameter
-    this.router.navigate(['/workspace'], { queryParams: { source: source.name, defaultBranch: source.githubRepo.defaultBranch.displayName } });
+    const branchNames = source.githubRepo?.branches?.map(b => b.displayName).join(',') || '';
+    this.router.navigate(['/workspace'], {
+      queryParams: {
+        source: source.name,
+        defaultBranch: source.githubRepo?.defaultBranch?.displayName || 'main',
+        branches: branchNames || undefined
+      }
+    });
   }
 
   selectSession(session: Session) {
